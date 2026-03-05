@@ -230,7 +230,20 @@
         // शुरुआत के लिए आसान शब्द (Home Row वाले)
         const words = [
             "as", "df", "jk", "sad", "fall", "ask", "dad", "all", "glad", "flask", 
-            "dash", "half", "hall", "lass", "salad", "gas", "has", "ash", "flag","utsav","sankalp", "bhai", "moyemoye","baba","mulla","usha"
+"dash", "half", "hall", "lass", "salad", "gas", "has", "ash", "flag",
+"utsav", "sankalp", "bhai", "moyemoye", "baba", "mulla", "usha",
+
+// 🏠 बीच वाली लाइन (Home Row) की पक्की प्रैक्टिस के लिए:
+"kala", "jala", "daldal", "salsa", "slash", "glass", "flash", "alfa",
+
+// 🤩 छोटे और आसान देसी शब्द (जिनसे उंगलियां तेज भागेंगी):
+"naam", "kaam", "daam", "sham", "ram", "pani", "nani", "dadi", "mama", "chacha",
+
+// 🔥 थोड़े बड़े और मजेदार शब्द (थोड़ा चैलेंज):
+"dost", "mummy", "papa", "khana", "pina", "khelna", "jalwa", "system", "mast", "zabardast",
+
+// 🚀 सबसे ज्यादा इस्तेमाल होने वाले आसान इंग्लिश शब्द (स्पीड बढ़ाने के लिए):
+"the", "and", "for", "that", "this", "with", "from", "here", "there", "what", "good", "time"
         ];
 
         let score = 0;
@@ -291,7 +304,7 @@
             try { document.documentElement.requestFullscreen(); } catch(e) {}
 
             score = 0;
-            timeLeft = 60;
+            timeLeft = 100;
             scoreElement.innerText = score;
             timerElement.innerText = timeLeft;
             
