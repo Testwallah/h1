@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔥 Cyber Hacker Puzzle 🥰</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Baloo 2', cursive;
+            margin: 0;
+            background-color: #0f172a; /* Dark Cyberpunk theme */
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        /* Hacker Font for passwords */
+        .hacker-font {
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        /* Game Board */
+        #game-board {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            gap: 4px;
+            background: #1e293b;
+            padding: 8px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.2), inset 0 0 10px rgba(0,0,0,0.5);
+            border: 2px solid #334155;
+            width: 90vw;
+            max-width: 500px;
+            height: 90vw;
+            max-height: 500px;
+            position: relative;
+        }
+
+        /* Individual Cells */
+        .cell {
+            background: #0f172a;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        /* Box Selection Glow */
+        .cell.selected-box {
+            box-shadow: 0 0 15px #38bdf8;
+            transform: scale(1.1);
+            z-index: 10;
+            border: 2px solid #38bdf8;
+        }
+
+        /* Empty valid drop target glow */
+        .cell.valid-target {
+            background: rgba(56, 189, 248, 0.2);
+            border: 2px dashed #38bdf8;
+            cursor: pointer;
+        }
+
+        /* Entities */
+        .wall { background: #334155; }
+        .wall::after { content: "🧱"; }
+        
+        .box { background: #0284c7; cursor: pointer; box-shadow: inset 0 0 10px rgba(255,255,255,0.2); }
+        .box::after { content: "🟦"; }
+        
+        .gate { background: #be123c; box-shadow: 0 0 15px rgba(225, 29, 72, 0.5); }
+        .gate::after { content: "🚪"; font-size: 1.8rem;}
+        
+        .goal { background: #166534; box-shadow: 0 0 20px rgba(34, 197, 94, 0.6); }
+        .goal::after { content: "🌟"; animation: pulse 1.5s infinite; }
+        
+        .player { 
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            z-index: 20;
+            transition: transform 0.15s ease-out; /* Smooth Movement */
+        }
+        .player::after { content: "😎"; filter: drop-shadow(0 0 5px #fff); }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        /* Hacking Overlay */
+        #hack-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(4px);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        #hack-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* Instructions */
+        .control-badge {
+            background: rgba(255,255,255,0.1);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+    </style>
+</head>
+<body tabindex="0"> <!-- Taaki body par keyboard focus rahe -->
+
+    <!-- Header -->
+    <div class="text-center mb-4">
+        <h1 class="text-3xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400">
+            🔥 साइबर हैकर 🥰
+        </h1>
+        <div class="flex gap-2 justify-center mt-2 flex-wrap max-w-md">
+            <span class="control-badge text-cyan-300">🖱️ <b>माउस:</b> बॉक्स (🟦) को खिसकाओ</span>
+            <span class="control-badge text-yellow-300">⌨️ <b>कीबोर्ड:</b> हैकर (😎) को चलाओ</span>
+            <span class="control-badge text-red-300">⌨️ <b>टाइपिंग:</b> गेट (🚪) हैक करो</span>
+        </div>
+    </div>
+
+    <!-- HUD -->
+    <div class="flex justify-between w-full max-w-[500px] mb-2 px-2">
+        <div class="text-xl font-bold text-gray-300">Level: <span id="level-display" class="text-cyan-400">1</span></div>
+        <button id="reset-btn" class="bg-red-500/20 hover:bg-red-500/40 text-red-400 px-4 py-1 rounded-md border border-red-500/50 transition-colors">
+            🔄 रिसेट (Reset)
+        </button>
+    </div>
+
+    <!-- Game Area -->
+    <div id="game-board">
+        <!-- Cells banenge JS se -->
+        
+        <!-- Player Element -->
+        <div id="player" class="player"></div>
+
+        <!-- Hacking Terminal Overlay -->
+        <div id="hack-overlay">
+            <h2 class="text-red-400 text-2xl font-bold mb-2 animate-pulse">⚠️ SECURITY GATE ⚠️</h2>
+            <p class="text-gray-300 mb-4 text-center px-4">गेट खोलने के लिए नीचे दिया गया कोड अपने कीबोर्ड से जल्दी टाइप करो!</p>
+            
+            <div id="target-word" class="hacker-font text-5xl tracking-widest text-cyan-400 mb-6 drop-shadow-[0_0_10px_rgba(34,211,238,0.8)]">
+                HACK
+            </div>
+            
+            <!-- Typing progress tracker -->
+            <div class="flex gap-2 mb-4" id="typing-progress">
+                <!-- Spans banenge JS se -->
+            </div>
+            
+            <p class="text-sm text-gray-500">OTG कीबोर्ड का इस्तेमाल करें ⌨️</p>
+        </div>
+    </div>
+
+    <!-- Level Complete Screen -->
+    <div id="win-screen" class="hidden absolute inset-0 bg-black/90 z-[100] flex flex-col items-center justify-center text-white backdrop-blur-sm">
+        <div class="text-8xl mb-4">🏆</div>
+        <h1 class="text-5xl mb-2 text-green-400 font-bold">Level Clear! 🔥</h1>
+        <p class="text-xl mb-8 text-gray-300">तुमने माउस और कीबोर्ड दोनों का शानदार इस्तेमाल किया!</p>
+        <button id="next-level-btn" class="bg-gradient-to-r from-green-500 to-emerald-600 font-bold py-3 px-10 rounded-full text-2xl shadow-[0_5px_0_#065f46] active:translate-y-[5px] active:shadow-none transition-all">
+            अगला लेवल ⏭️
+        </button>
+    </div>
+
+    <script>
+        // --- GAME DATA ---
+        // 0: Empty, 1: Wall, 2: Movable Box, 3: Goal, 4: Gate
+        const levels = [
+            {   // LEVEL 1: Easy (Focus on Mouse move + basic walking)
+                grid: [
+                    [0,0,0,1,1,1,1,1],
+                    [0,0,0,1,3,0,0,1],
+                    [1,1,0,1,1,1,0,1],
+                    [1,0,0,0,2,0,0,1],
+                    [1,0,1,1,1,1,1,1],
+                    [1,0,2,0,0,0,0,1],
+                    [1,1,1,1,1,0,0,1],
+                    [1,1,1,1,1,1,1,1]
+                ],
+                startPos: {r: 1, c: 0}, // Row 1, Col 0
+                gateWord: ""
+            },
+            {   // LEVEL 2: Introduce Typing Gate
+                grid: [
+                    [1,1,1,1,1,1,1,1],
+                    [1,0,0,0,1,3,0,1],
+                    [1,0,1,0,4,0,0,1], // 4 is Gate
+                    [1,2,1,1,1,1,1,1],
+                    [1,0,0,0,0,0,0,1],
+                    [1,1,1,1,1,2,0,1],
+                    [1,1,1,1,1,0,0,1],
+                    [1,1,1,1,1,1,1,1]
+                ],
+                startPos: {r: 1, c: 1},
+                gateWord: "KEYBOARD"
+            },
+            {   // LEVEL 3: Complex Puzzle
+                grid: [
+                    [1,1,1,1,1,1,1,1],
+                    [1,0,0,2,0,0,0,1],
+                    [1,1,1,1,1,2,1,1],
+                    [1,0,0,4,0,0,3,1], // Gate & Goal
+                    [1,0,1,1,1,1,1,1],
+                    [1,2,0,0,0,0,0,1],
+                    [1,0,1,1,1,1,0,1],
+                    [1,1,1,1,1,1,1,1]
+                ],
+                startPos: {r: 6, c: 1},
+                gateWord: "MASTERPIECE"
+            }
+        ];
+
+        let currentLevel = 0;
+        let gridData = [];
+        let playerPos = {r: 0, c: 0};
+        let selectedBox = null; // Mouse drag state
+        let isHackingMode = false;
+        let hackWord = "";
+        let typedCharacters = 0;
+
+        // --- DOM ELEMENTS ---
+        const board = document.getElementById('game-board');
+        const playerEl = document.getElementById('player');
+        const levelDisplay = document.getElementById('level-display');
+        const hackOverlay = document.getElementById('hack-overlay');
+        const targetWordEl = document.getElementById('target-word');
+        const typingProgressEl = document.getElementById('typing-progress');
+        const winScreen = document.getElementById('win-screen');
+
+        // --- INIT GAME ---
+        function loadLevel(levelIndex) {
+            if (levelIndex >= levels.length) {
+                alert("🎉 बधाई हो दोस्त! तुमने सारे लेवल पार कर लिए! तुम असली मास्टर हो! 🥰🔥");
+                levelIndex = 0; // Restart
+            }
+            
+            currentLevel = levelIndex;
+            const levelConfig = levels[currentLevel];
+            
+            // Deep copy grid taaki reset karne me asani ho
+            gridData = JSON.parse(JSON.stringify(levelConfig.grid));
+            playerPos = { ...levelConfig.startPos };
+            hackWord = levelConfig.gateWord;
+            
+            levelDisplay.textContent = currentLevel + 1;
+            selectedBox = null;
+            isHackingMode = false;
+            hackOverlay.classList.remove('active');
+            winScreen.classList.add('hidden');
+            
+            renderBoard();
+            updatePlayerPosition();
+            
+            // Keep focus for keyboard
+            document.body.focus();
+        }
+
+        // --- RENDER GRID ---
+        function renderBoard() {
+            // Player hamesha board me rahega, baki cells dobara banenge
+            board.innerHTML = '';
+            board.appendChild(playerEl); 
+            board.appendChild(hackOverlay);
+
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    const val = gridData[r][c];
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.r = r;
+                    cell.dataset.c = c;
+
+                    if (val === 1) cell.classList.add('wall');
+                    if (val === 2) {
+                        cell.classList.add('box');
+                        // MOUSE INTERACTION: Box click
+                        cell.addEventListener('mousedown', (e) => handleBoxClick(r, c, e));
+                    }
+                    if (val === 3) cell.classList.add('goal');
+                    if (val === 4) cell.classList.add('gate');
+                    
+                    if (val === 0) {
+                        // Empty cell can be a target for a box
+                        cell.addEventListener('mousedown', (e) => handleEmptyClick(r, c, e));
+                    }
+
+                    // Highlight logic if a box is selected
+                    if (selectedBox && selectedBox.r === r && selectedBox.c === c) {
+                        cell.classList.add('selected-box');
+                    }
+                    if (selectedBox && val === 0) {
+                        // Check if it's adjacent to the selected box (Up, Down, Left, Right)
+                        const isAdjacent = (Math.abs(selectedBox.r - r) + Math.abs(selectedBox.c - c)) === 1;
+                        if(isAdjacent) cell.classList.add('valid-target');
+                    }
+
+                    board.appendChild(cell);
+                }
+            }
+        }
+
+        function updatePlayerPosition() {
+            // CSS grid ke hisab se translate karenge (Smooth animation)
+            const cellWidth = 100 / 8; // 8x8 grid
+            playerEl.style.transform = `translate(${playerPos.c * 100}%, ${playerPos.r * 100}%)`;
+            playerEl.style.width = `${cellWidth}%`;
+            playerEl.style.height = `${cellWidth}%`;
+            playerEl.style.left = '0';
+            playerEl.style.top = '0';
+        }
+
+        // --- MOUSE MECHANICS (BOX SHIFTING) ---
+        function handleBoxClick(r, c, e) {
+            e.stopPropagation(); // Event bubble roko
+            if (isHackingMode) return; // Typing ke beech me click nahi
+
+            // Agar player box ke upar khada hai to move nahi kar sakte
+            if (playerPos.r === r && playerPos.c === c) {
+                // Do nothing or show visual shake
+                return;
+            }
+
+            if (selectedBox && selectedBox.r === r && selectedBox.c === c) {
+                selectedBox = null; // Deselect
+            } else {
+                selectedBox = {r, c}; // Select new box
+            }
+            renderBoard(); // UI update karo (glow lagao)
+        }
+
+        function handleEmptyClick(r, c, e) {
+            e.stopPropagation();
+            if (isHackingMode) return;
+            
+            if (selectedBox) {
+                // Check if target is empty and adjacent
+                const val = gridData[r][c];
+                const isAdjacent = (Math.abs(selectedBox.r - r) + Math.abs(selectedBox.c - c)) === 1;
+                
+                // Player ki jagah box mat rakho
+                const isPlayerHere = (playerPos.r === r && playerPos.c === c);
+
+                if (val === 0 && isAdjacent && !isPlayerHere) {
+                    // Move box logic
+                    gridData[r][c] = 2; // Nayi jagah pe box
+                    gridData[selectedBox.r][selectedBox.c] = 0; // Purani jagah khali
+                    selectedBox = null; // Deselect
+                    renderBoard();
+                    
+                    // Sound/Haptic feedback
+                    if(navigator.vibrate) navigator.vibrate(20);
+                } else {
+                    selectedBox = null; // Galat jagah click kiya to deselect
+                    renderBoard();
+                }
+            }
+        }
+
+        // --- KEYBOARD MECHANICS (MOVEMENT & HACKING) ---
+        window.addEventListener('keydown', (e) => {
+            // Mobile par keyboard open na ho uske liye focus maintain
+            document.body.focus();
+
+            if (winScreen.classList.contains('hidden') === false) return; // Level complete hone par ruk jao
+
+            // == HACKING MODE (Typing Password) ==
+            if (isHackingMode) {
+                const key = e.key.toUpperCase();
+                const expectedChar = hackWord[typedCharacters].toUpperCase();
+
+                // Sirf alphabet type kare
+                if (/^[A-Z]$/.test(key)) {
+                    if (key === expectedChar) {
+                        // Sahi letter type kiya!
+                        typedCharacters++;
+                        updateTypingUI();
+                        if(navigator.vibrate) navigator.vibrate(30);
+
+                        // Kya pura word type ho gaya?
+                        if (typedCharacters >= hackWord.length) {
+                            successHack();
+                        }
+                    } else {
+                        // Galat letter! Screen shake
+                        hackOverlay.style.transform = 'translate(10px, 0)';
+                        setTimeout(() => hackOverlay.style.transform = 'translate(-10px, 0)', 50);
+                        setTimeout(() => hackOverlay.style.transform = 'translate(0, 0)', 100);
+                        if(navigator.vibrate) navigator.vibrate([50, 50, 50]);
+                    }
+                }
+                return; // Agar hacking chal rahi hai, to movement mat karo
+            }
+
+            // == MOVEMENT MODE (Arrows or WASD) ==
+            let newR = playerPos.r;
+            let newC = playerPos.c;
+
+            if (e.key === 'ArrowUp' || e.key.toLowerCase() === 'w') newR--;
+            if (e.key === 'ArrowDown' || e.key.toLowerCase() === 's') newR++;
+            if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') newC--;
+            if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') newC++;
+
+            // Check if moved
+            if (newR !== playerPos.r || newC !== playerPos.c) {
+                e.preventDefault(); // Stop scrolling
+                
+                // Boundary check
+                if (newR >= 0 && newR < 8 && newC >= 0 && newC < 8) {
+                    const targetCell = gridData[newR][newC];
+
+                    if (targetCell === 0 || targetCell === 3) {
+                        // Rasta khali hai ya Goal hai -> Move!
+                        playerPos.r = newR;
+                        playerPos.c = newC;
+                        updatePlayerPosition();
+
+                        if (targetCell === 3) {
+                            levelComplete();
+                        }
+                    } 
+                    else if (targetCell === 4) {
+                        // Security Gate aa gaya! Hack start karo
+                        startHacking();
+                    }
+                    else if (targetCell === 2 || targetCell === 1) {
+                        // Box (2) ya Deewar (1) se takraya
+                        // Thoda bump effect
+                        playerEl.style.transform = `translate(${playerPos.c * 100}%, ${playerPos.r * 100}%) scale(0.9)`;
+                        setTimeout(() => updatePlayerPosition(), 100);
+                    }
+                }
+            }
+        });
+
+        // --- HACKING LOGIC ---
+        function startHacking() {
+            isHackingMode = true;
+            typedCharacters = 0;
+            hackOverlay.classList.add('active');
+            targetWordEl.textContent = hackWord;
+            updateTypingUI();
+        }
+
+        function updateTypingUI() {
+            typingProgressEl.innerHTML = '';
+            for (let i = 0; i < hackWord.length; i++) {
+                const span = document.createElement('span');
+                span.className = `w-8 h-10 border-b-4 flex items-center justify-center text-2xl font-bold ${i < typedCharacters ? 'border-green-400 text-green-400' : 'border-gray-500 text-transparent'}`;
+                span.textContent = hackWord[i]; // Text hidden via color if not typed yet
+                typingProgressEl.appendChild(span);
+            }
+        }
+
+        function successHack() {
+            // Gate khul gaya!
+            setTimeout(() => {
+                hackOverlay.classList.remove('active');
+                isHackingMode = false;
+                
+                // Gate ko grid se hatao (Make it empty = 0)
+                for (let r = 0; r < 8; r++) {
+                    for (let c = 0; c < 8; c++) {
+                        if (gridData[r][c] === 4) {
+                            gridData[r][c] = 0;
+                            // Green blast effect
+                            confetti({
+                                particleCount: 30, spread: 50, colors: ['#4ade80', '#000000']
+                            });
+                        }
+                    }
+                }
+                renderBoard(); // Update grid without gate
+            }, 500);
+        }
+
+        // --- LEVEL COMPLETE ---
+        function levelComplete() {
+            // Thoda delay taaki player goal par pahuchta hua dikhe
+            setTimeout(() => {
+                winScreen.classList.remove('hidden');
+                confetti({
+                    particleCount: 150,
+                    spread: 100,
+                    origin: { y: 0.6 },
+                    colors: ['#38bdf8', '#4ade80', '#facc15']
+                });
+            }, 300);
+        }
+
+        // Buttons
+        document.getElementById('reset-btn').addEventListener('click', () => loadLevel(currentLevel));
+        document.getElementById('next-level-btn').addEventListener('click', () => loadLevel(currentLevel + 1));
+
+        // Disable right click to avoid dragging issues
+        document.addEventListener('contextmenu', event => event.preventDefault());
+
+        // Start Game
+        loadLevel(0);
+
+    </script>
+</body>
+</html>
+
