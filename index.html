@@ -13,25 +13,52 @@
     
     <style>
         :root {
-            --glass-bg: rgba(20, 25, 40, 0.45);
-            --glass-border: rgba(255, 255, 255, 0.2);
-            --glass-highlight: rgba(255, 255, 255, 0.3);
+            --glass-bg: rgba(20, 25, 40, 0.35);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --glass-highlight: rgba(255, 255, 255, 0.25);
         }
 
+        /* 🌈 Advanced Animated Gradient Background */
         body {
             font-family: 'Outfit', sans-serif;
             margin: 0;
             overflow: hidden;
-            /* Default Wallpaper */
-            background-image: url('https://512pixels.net/wp-content/uploads/2025/06/14-Sonoma-Light-thumb.jpg');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
             height: 100vh;
             width: 100vw;
             user-select: none;
             color: white;
-            transition: background-image 0.5s ease-in-out;
+            /* Default Beautiful Moving Gradient */
+            background: linear-gradient(-45deg, #0f172a, #312e81, #1e1b4b, #064e3b);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            transition: all 0.5s ease-in-out;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 🖼️ Hidden GIF Wallpaper Class (Triggered by Alt+G) */
+        body.gif-wallpaper {
+            background-image: url('https://s13.gifyu.com/images/bmzDJ.gif') !important;
+            background-size: cover !important;
+            background-position: center !important;
+            animation: none !important; /* Stop gradient animation */
+        }
+
+        /* Fast Boot Screen */
+        #boot-screen {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease;
         }
 
         /* Portrait Warning overlay */
@@ -72,7 +99,7 @@
             z-index: 10;
         }
 
-        /* Mac Style App Icons */
+        /* 🍏 Mac Style App Icons (Opening in New Tab) */
         .app-icon-wrapper {
             display: flex;
             flex-direction: column;
@@ -80,7 +107,7 @@
             gap: 8px;
             cursor: pointer;
             text-decoration: none;
-            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
         }
 
         .mac-icon {
@@ -90,15 +117,25 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mac-icon::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 50%);
+            border-radius: 22%;
         }
 
         .app-icon-wrapper:hover .mac-icon {
             transform: translateY(-5px) scale(1.08);
-            box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.6);
-            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.7);
+            border-color: rgba(255, 255, 255, 0.5);
         }
 
         .app-icon-wrapper:active .mac-icon {
@@ -109,20 +146,52 @@
             width: 32px;
             height: 32px;
             color: white;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+            z-index: 2;
         }
 
         .app-title {
             font-size: 0.8rem;
-            font-weight: 500;
+            font-weight: 600;
             text-align: center;
-            text-shadow: 0px 1px 3px rgba(0,0,0,0.9);
+            text-shadow: 0px 2px 4px rgba(0,0,0,0.9);
             letter-spacing: 0.3px;
             color: white;
-            background: rgba(0,0,0,0.2);
-            padding: 2px 8px;
+            background: rgba(0,0,0,0.3);
+            padding: 3px 10px;
             border-radius: 12px;
             backdrop-filter: blur(4px);
+            transition: all 0.3s;
+        }
+
+        .app-icon-wrapper:hover .app-title {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Custom Right Click Menu */
+        #context-menu {
+            display: none;
+            position: absolute;
+            z-index: 10000;
+            width: 200px;
+            border-radius: 12px;
+            padding: 8px;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .menu-item {
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.2s;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.2);
         }
 
         /* Taskbar */
@@ -131,81 +200,35 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 45px;
+            height: 50px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 20px;
             z-index: 1000;
             border-top: 1px solid var(--glass-border);
-            border-bottom: none;
-            border-left: none;
-            border-right: none;
-            background: rgba(10, 15, 30, 0.6);
+            background: rgba(10, 15, 30, 0.65);
+            backdrop-filter: blur(30px);
         }
 
-        /* OS Window styling */
-        .os-window {
-            position: absolute;
-            top: 10%;
-            left: 10%;
-            width: 800px;
-            max-width: 90vw;
-            height: 600px;
-            max-height: 80vh;
-            display: flex;
-            flex-direction: column;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            opacity: 0;
-            transform: scale(0.95);
-            animation: windowOpen 0.3s forwards;
-        }
-
-        .os-window.maximized {
-            top: 0 !important;
-            left: 0 !important;
-            width: 100vw !important;
-            max-width: 100vw !important;
-            height: calc(100vh - 45px) !important; /* Taskbar height minus */
-            max-height: 100vh !important;
-            border-radius: 0;
-        }
-
-        .window-header {
-            height: 38px;
-            background: linear-gradient(to bottom, rgba(60,60,60,0.8), rgba(40,40,40,0.9));
-            border-bottom: 1px solid rgba(0,0,0,0.5);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 15px;
-            cursor: move;
-            backdrop-filter: blur(10px);
-        }
-
-        /* Keyframes */
         @keyframes popIn {
             0% { opacity: 0; transform: scale(0.5) translateY(20px); }
             100% { opacity: 1; transform: scale(1) translateY(0); }
         }
-
-        @keyframes windowOpen {
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
             to { opacity: 1; transform: scale(1); }
-        }
-
-        /* Hide scrollbar for iframe container */
-        .window-content {
-            flex: 1;
-            background: #fff;
-            position: relative;
         }
 
     </style>
 </head>
 <body>
+
+    <!-- 🚀 Fast Boot Screen -->
+    <div id="boot-screen">
+        <div class="w-16 h-16 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin mb-4"></div>
+        <h2 class="text-2xl font-bold text-white tracking-widest animate-pulse">UTSAV OS Starting...</h2>
+    </div>
 
     <!-- Portrait Warning -->
     <div id="portrait-warning">
@@ -214,22 +237,38 @@
         <p class="text-lg text-gray-300">अपना स्क्रीन घुमाए 🔄</p>
     </div>
 
-    <!-- Desktop Area -->
+    <!-- 💻 Custom Right Click Menu -->
+    <div id="context-menu" class="glass-panel">
+        <div class="menu-item" onclick="triggerRefresh()">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+            Refresh
+        </div>
+        <div class="menu-item" onclick="toggleFullScreen()">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+            Full Screen
+        </div>
+        <div class="h-[1px] bg-white/20 my-1"></div>
+        <div class="menu-item text-xs text-gray-300 pointer-events-none">
+            Alt+G : GIF Wall<br>Alt+S : Color Wall
+        </div>
+    </div>
+
+    <!-- 📱 Desktop Area (Opening in new tabs just like before) -->
     <div id="desktop">
         
         <!-- App 1: Baloon Game -->
-        <div class="app-icon-wrapper" style="animation-delay: 0.1s" onclick="openApp(event, 'bln.html', 'Baloon Game')">
-            <div class="mac-icon bg-gradient-to-br from-red-400 to-rose-600">
+        <a href="bln.html" target="_blank" class="app-icon-wrapper" style="animation-delay: 0.1s" onclick="fireConfetti(event)">
+            <div class="mac-icon bg-gradient-to-br from-red-500 to-rose-700">
                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
                     <path d="M12 2C9.5 2 7.5 4.5 7.5 8C7.5 11.5 10.5 15 12 17C13.5 15 16.5 11.5 16.5 8C16.5 4.5 14.5 2 12 2ZM11.5 18H12.5L13 22H11L11.5 18Z"/>
                 </svg>
             </div>
             <span class="app-title">Baloon Game</span>
-        </div>
+        </a>
 
         <!-- App 2: MK Game -->
-        <div class="app-icon-wrapper" style="animation-delay: 0.2s" onclick="openApp(event, 'cyb.html', 'MK Game')">
-            <div class="mac-icon bg-gradient-to-br from-blue-400 to-indigo-600">
+        <a href="cyb.html" target="_blank" class="app-icon-wrapper" style="animation-delay: 0.2s" onclick="fireConfetti(event)">
+            <div class="mac-icon bg-gradient-to-br from-blue-500 to-indigo-700">
                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
                     <rect x="5" y="2" width="14" height="20" rx="7"/>
                     <line x1="12" y1="8" x2="12" y2="12" stroke="white" stroke-width="2" stroke-linecap="round"/>
@@ -237,313 +276,162 @@
                 </svg>
             </div>
             <span class="app-title">MK Game</span>
-        </div>
+        </a>
 
         <!-- App 3: KeyMAP -->
-        <div class="app-icon-wrapper" style="animation-delay: 0.3s" onclick="openApp(event, 'info.html', 'KeyMAP')">
-            <div class="mac-icon bg-gradient-to-br from-gray-600 to-gray-900">
+        <a href="info.html" target="_blank" class="app-icon-wrapper" style="animation-delay: 0.3s" onclick="fireConfetti(event)">
+            <div class="mac-icon bg-gradient-to-br from-gray-700 to-black">
                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
                     <rect x="2" y="6" width="20" height="12" rx="2"/>
-                    <rect x="4" y="8" width="2" height="2" fill="black" opacity="0.5" rx="0.5"/>
-                    <rect x="8" y="8" width="2" height="2" fill="black" opacity="0.5" rx="0.5"/>
-                    <rect x="12" y="8" width="2" height="2" fill="black" opacity="0.5" rx="0.5"/>
-                    <rect x="16" y="8" width="2" height="2" fill="black" opacity="0.5" rx="0.5"/>
-                    <rect x="6" y="12" width="12" height="2" fill="black" opacity="0.5" rx="0.5"/>
+                    <rect x="4" y="8" width="2" height="2" fill="white" opacity="0.8" rx="0.5"/>
+                    <rect x="8" y="8" width="2" height="2" fill="white" opacity="0.8" rx="0.5"/>
+                    <rect x="12" y="8" width="2" height="2" fill="white" opacity="0.8" rx="0.5"/>
+                    <rect x="16" y="8" width="2" height="2" fill="white" opacity="0.8" rx="0.5"/>
+                    <rect x="6" y="12" width="12" height="2" fill="white" opacity="0.8" rx="0.5"/>
                 </svg>
             </div>
             <span class="app-title">KeyMAP</span>
-        </div>
+        </a>
 
         <!-- App 4: Passage -->
-        <div class="app-icon-wrapper" style="animation-delay: 0.4s" onclick="openApp(event, 'para.html', 'Passage')">
-            <div class="mac-icon bg-gradient-to-br from-purple-400 to-fuchsia-600">
+        <a href="para.html" target="_blank" class="app-icon-wrapper" style="animation-delay: 0.4s" onclick="fireConfetti(event)">
+            <div class="mac-icon bg-gradient-to-br from-purple-500 to-fuchsia-700">
                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
                     <path d="M6 2C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V4C20 2.89543 19.1046 2 18 2H6ZM8 6H16V8H8V6ZM8 10H16V12H8V10ZM8 14H13V16H8V14Z"/>
                 </svg>
             </div>
             <span class="app-title">Passage</span>
-        </div>
+        </a>
 
         <!-- App 5: Words Type -->
-        <div class="app-icon-wrapper" style="animation-delay: 0.5s" onclick="openApp(event, 'type.html', 'Words Type')">
-            <div class="mac-icon bg-gradient-to-br from-orange-400 to-amber-600">
+        <a href="type.html" target="_blank" class="app-icon-wrapper" style="animation-delay: 0.5s" onclick="fireConfetti(event)">
+            <div class="mac-icon bg-gradient-to-br from-orange-500 to-amber-600">
                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
                     <rect x="3" y="3" width="18" height="18" rx="4"/>
                     <text x="12" y="17" font-size="14" font-weight="bold" fill="white" text-anchor="middle" font-family="sans-serif">T</text>
                 </svg>
             </div>
             <span class="app-title">Words Type</span>
-        </div>
+        </a>
 
         <!-- App 6: ZomGame -->
-        <div class="app-icon-wrapper" style="animation-delay: 0.6s" onclick="openApp(event, 'zom.html', 'ZomGame')">
-            <div class="mac-icon bg-gradient-to-br from-emerald-400 to-green-600">
+        <a href="zom.html" target="_blank" class="app-icon-wrapper" style="animation-delay: 0.6s" onclick="fireConfetti(event)">
+            <div class="mac-icon bg-gradient-to-br from-emerald-500 to-green-700">
                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
                     <path d="M12 2C8.13401 2 5 5.13401 5 9V19.5C5 20.8807 6.11929 22 7.5 22C8.1611 22 8.76269 21.7431 9.20711 21.3197L10.3803 20.1464C11.2589 19.2678 12.6834 19.2678 13.562 20.1464L14.7353 21.3197C15.1797 21.7431 15.7813 22 16.4424 22C17.8231 22 18.9424 20.8807 18.9424 19.5V9C18.9424 5.13401 15.8084 2 11.9424 2H12ZM9 8C9.55228 8 10 8.44772 10 9C10 9.55228 9.55228 10 9 10C8.44772 10 8 9.55228 8 9C8 8.44772 8.44772 8 9 8ZM15 8C15.5523 8 16 8.44772 16 9C16 9.55228 15.5523 10 15 10C14.4477 10 14 9.55228 14 9C14 8.44772 14.4477 8 15 8ZM10.5 14H13.5V16H10.5V14Z"/>
                 </svg>
             </div>
             <span class="app-title">ZomGame</span>
-        </div>
+        </a>
 
     </div>
 
-    <!-- Container for opened Windows -->
-    <div id="windows-container"></div>
-
-    <!-- Taskbar -->
-    <div id="taskbar" class="glass-panel backdrop-blur-3xl">
+    <!-- 🎛️ Taskbar -->
+    <div id="taskbar">
         <!-- Start / Logo Area -->
         <div class="flex items-center gap-4">
-            <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-cyan-400 to-blue-600 flex items-center justify-center shadow-[0_0_15px_rgba(34,211,238,0.5)] cursor-pointer hover:rotate-180 transition-all duration-500" onclick="hugeConfetti()">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-400 to-blue-600 flex items-center justify-center shadow-[0_0_15px_rgba(34,211,238,0.5)] cursor-pointer hover:rotate-180 transition-all duration-500" onclick="hugeConfetti()">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
             </div>
-            <span class="font-bold text-md tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300">UTSAV OS</span>
+            <span class="font-bold text-lg tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300">UTSAV OS</span>
         </div>
 
         <!-- System Tray -->
         <div class="flex items-center gap-4">
+            
+            <!-- Full Screen Button -->
+            <button onclick="toggleFullScreen()" class="hover:bg-white/20 p-2 rounded-lg transition-all" title="Full Screen">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+            </button>
+
             <!-- Clock -->
-            <div id="clock" class="text-xs font-mono font-bold bg-black/50 px-3 py-1.5 rounded-md border border-white/10 shadow-inner">
+            <div id="clock" class="text-sm font-mono font-bold bg-black/50 px-3 py-1.5 rounded-md border border-white/10 shadow-inner">
                 00:00 AM
             </div>
         </div>
     </div>
 
     <script>
+        // --- 🚀 FAST BOOT ANIMATION ---
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const bootScreen = document.getElementById('boot-screen');
+                bootScreen.style.opacity = '0';
+                setTimeout(() => bootScreen.remove(), 500);
+                
+                // Welcome Confetti
+                confetti({ particleCount: 100, spread: 100, origin: { y: 0.6 } });
+            }, 800); // 0.8s boot time
+        });
+
         // --- 🖼️ HIDDEN WALLPAPER SYSTEM (ALT+G / ALT+S) ---
-        // Alt+G = GIF, Alt+S = Default Sonoma
+        // Alt+G = Secret GIF, Alt+S = Default Gradient Back
         document.addEventListener('keydown', (e) => {
             if (e.altKey && e.key.toLowerCase() === 'g') {
                 e.preventDefault();
-                document.body.style.backgroundImage = "url('https://s13.gifyu.com/images/bmzDJ.gif')";
-                console.log("Secret Wallpaper Activated! 🤫");
+                // Add class to change background smoothly
+                document.body.classList.add('gif-wallpaper');
+                console.log("Secret GIF Wallpaper Activated! 🤫");
             }
             if (e.altKey && e.key.toLowerCase() === 's') {
                 e.preventDefault();
-                document.body.style.backgroundImage = "url('https://512pixels.net/wp-content/uploads/2025/06/14-Sonoma-Light-thumb.jpg')";
-                console.log("Default Wallpaper Restored! 🌅");
+                // Remove class to go back to Default Gradient
+                document.body.classList.remove('gif-wallpaper');
+                console.log("Default Animated Gradient Restored! 🌈");
             }
         });
 
-        // --- 🪟 WINDOW MANAGEMENT SYSTEM (PC STYLE) ---
-        const windows = {}; // Keep track of opened apps
-        let zIndexCounter = 100;
-
-        function openApp(event, url, title) {
-            event.preventDefault();
+        // --- 💻 CUSTOM RIGHT CLICK MENU ---
+        const contextMenu = document.getElementById('context-menu');
+        
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault(); // Default menu hatao
+            contextMenu.style.display = 'block';
             
-            // Celebration for opening app
-            confetti({ particleCount: 40, spread: 50, origin: { x: event.clientX / window.innerWidth, y: event.clientY / window.innerHeight } });
-
-            // If app is already open, just bring it to front and show
-            if (windows[title]) {
-                const win = windows[title];
-                win.style.display = 'flex';
-                bringToFront(win);
-                return;
-            }
-
-            // Create new Window Container
-            const win = document.createElement('div');
-            win.className = `os-window glass-panel`;
-            win.id = `window-${title.replace(/\s/g, '')}`;
-            win.style.zIndex = ++zIndexCounter;
+            // Adjust position so it doesn't go out of screen
+            let x = e.clientX;
+            let y = e.clientY;
             
-            // Random slight offset so windows don't perfectly overlap
-            const offset = Object.keys(windows).length * 20;
-            win.style.top = `calc(10% + ${offset}px)`;
-            win.style.left = `calc(10% + ${offset}px)`;
+            if (x + 200 > window.innerWidth) x = window.innerWidth - 210;
+            if (y + 100 > window.innerHeight) y = window.innerHeight - 110;
 
-            // Window Header (Mac Style Traffic Lights)
-            const header = document.createElement('div');
-            header.className = 'window-header';
-            
-            // Traffic lights container
-            const lights = document.createElement('div');
-            lights.className = 'flex gap-2 w-16';
-            lights.innerHTML = `
-                <div class="w-3.5 h-3.5 rounded-full bg-red-500 hover:bg-red-600 shadow-inner border border-red-700 cursor-pointer flex items-center justify-center group" onclick="closeApp('${title}')">
-                    <svg class="w-2 h-2 opacity-0 group-hover:opacity-100 text-red-900" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-                </div>
-                <div class="w-3.5 h-3.5 rounded-full bg-yellow-500 hover:bg-yellow-600 shadow-inner border border-yellow-700 cursor-pointer flex items-center justify-center group" onclick="minimizeApp('${title}')">
-                    <svg class="w-2 h-2 opacity-0 group-hover:opacity-100 text-yellow-900" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
-                </div>
-                <div class="w-3.5 h-3.5 rounded-full bg-green-500 hover:bg-green-600 shadow-inner border border-green-700 cursor-pointer flex items-center justify-center group" onclick="maximizeApp('${title}')">
-                    <svg class="w-2 h-2 opacity-0 group-hover:opacity-100 text-green-900" fill="currentColor" viewBox="0 0 24 24"><path d="M15 3h6v6h-2V6.41L11.41 14l-1.42-1.41L17.59 5H15V3zM9 21H3v-6h2v4.59l7.59-7.59 1.41 1.42L6.41 19H9v2z"></path></svg>
-                </div>
-            `;
-
-            // Window Title
-            const titleSpan = document.createElement('div');
-            titleSpan.className = 'font-semibold text-gray-200 text-xs tracking-wide pointer-events-none';
-            titleSpan.innerText = title;
-
-            // Empty div to balance header flex
-            const spacer = document.createElement('div');
-            spacer.className = 'w-16';
-
-            header.appendChild(lights);
-            header.appendChild(titleSpan);
-            header.appendChild(spacer);
-
-            // Window Content (Iframe)
-            const content = document.createElement('div');
-            content.className = 'window-content';
-            
-            const iframe = document.createElement('iframe');
-            iframe.src = url;
-            iframe.className = 'w-full h-full border-none bg-white'; 
-
-            content.appendChild(iframe);
-            win.appendChild(header);
-            win.appendChild(content);
-            
-            document.getElementById('windows-container').appendChild(win);
-            windows[title] = win;
-
-            // Make it draggable
-            makeDraggable(win, header);
-
-            // Bring to front on click
-            win.addEventListener('mousedown', () => bringToFront(win));
-            win.addEventListener('touchstart', () => bringToFront(win), {passive: true});
-        }
-
-        // Window Controls Actions
-        function closeApp(title) {
-            if (windows[title]) {
-                windows[title].remove();
-                delete windows[title];
-            }
-        }
-
-        function minimizeApp(title) {
-            if (windows[title]) {
-                windows[title].style.display = 'none';
-            }
-        }
-
-        function maximizeApp(title) {
-            if (windows[title]) {
-                const win = windows[title];
-                win.classList.toggle('maximized');
-                bringToFront(win);
-            }
-        }
-
-        function bringToFront(win) {
-            win.style.zIndex = ++zIndexCounter;
-        }
-
-        // Dragging Logic (Supports Mouse & Touch)
-        function makeDraggable(win, handle) {
-            let isDragging = false;
-            let startX, startY, initialX, initialY;
-
-            handle.addEventListener('mousedown', dragStart);
-            document.addEventListener('mousemove', drag);
-            document.addEventListener('mouseup', dragEnd);
-
-            // Touch support for mobile dragging
-            handle.addEventListener('touchstart', dragStart, {passive: false});
-            document.addEventListener('touchmove', drag, {passive: false});
-            document.addEventListener('touchend', dragEnd);
-
-            function dragStart(e) {
-                // Don't drag if clicking buttons or maximized
-                if(e.target.closest('.w-3\\.5') || win.classList.contains('maximized')) return; 
-                
-                isDragging = true;
-                win.style.transition = 'none'; // Smooth drag
-                win.querySelector('iframe').style.pointerEvents = 'none'; // Prevent iframe from stealing mouse events
-
-                if (e.type === 'touchstart') {
-                    startX = e.touches[0].clientX;
-                    startY = e.touches[0].clientY;
-                } else {
-                    startX = e.clientX;
-                    startY = e.clientY;
-                }
-
-                const rect = win.getBoundingClientRect();
-                initialX = rect.left;
-                initialY = rect.top;
-                
-                bringToFront(win);
-            }
-
-            function drag(e) {
-                if (!isDragging) return;
-                e.preventDefault();
-
-                let currentX, currentY;
-                if (e.type === 'touchmove') {
-                    currentX = e.touches[0].clientX;
-                    currentY = e.touches[0].clientY;
-                } else {
-                    currentX = e.clientX;
-                    currentY = e.clientY;
-                }
-
-                const dx = currentX - startX;
-                const dy = currentY - startY;
-
-                win.style.left = `${initialX + dx}px`;
-                win.style.top = `${initialY + dy}px`;
-            }
-
-            function dragEnd() {
-                if (!isDragging) return;
-                isDragging = false;
-                win.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'; // Restore transition
-                win.querySelector('iframe').style.pointerEvents = 'auto'; // Re-enable iframe clicks
-            }
-        }
-
-        // --- ⚡ F11 FULLSCREEN LOGIC ---
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'F11') {
-                e.preventDefault(); // Stop default browser F11
-                
-                // Find top-most open window to maximize it inside OS
-                let topWindow = null;
-                let highestZ = 0;
-                
-                for (let key in windows) {
-                    if (windows[key].style.display !== 'none' && parseInt(windows[key].style.zIndex) > highestZ) {
-                        highestZ = parseInt(windows[key].style.zIndex);
-                        topWindow = windows[key];
-                    }
-                }
-
-                if (topWindow) {
-                    topWindow.classList.toggle('maximized');
-                } else {
-                    // If no window is open, make the whole website full screen
-                    if (!document.fullscreenElement) {
-                        document.documentElement.requestFullscreen().catch(err => console.log(err));
-                    } else {
-                        document.exitFullscreen();
-                    }
-                }
-            }
+            contextMenu.style.left = `${x}px`;
+            contextMenu.style.top = `${y}px`;
         });
 
-        // --- 🕰️ LIVE CLOCK ---
-        function updateClock() {
-            const now = new Date();
-            let hours = now.getHours();
-            let minutes = now.getMinutes();
-            let ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12;
-            hours = hours ? hours : 12;
-            minutes = minutes < 10 ? '0' + minutes : minutes;
-            document.getElementById('clock').textContent = hours + ':' + minutes + ' ' + ampm;
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
+        document.addEventListener('click', () => {
+            contextMenu.style.display = 'none';
+        });
 
-        // Start Button Huge Explosion
+        function triggerRefresh() {
+            window.location.reload();
+        }
+
+        // --- 🔲 FULL SCREEN LOGIC ---
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    alert(`Error attempting to enable fullscreen: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        // --- 🎉 CONFETTI ON CLICK ---
+        function fireConfetti(event) {
+            const x = event.clientX / window.innerWidth;
+            const y = event.clientY / window.innerHeight;
+            confetti({
+                particleCount: 50,
+                spread: 60,
+                origin: { x: x, y: y },
+                colors: ['#38bdf8', '#4ade80', '#facc15', '#f87171', '#c084fc']
+            });
+        }
+
         function hugeConfetti() {
             var duration = 2 * 1000;
             var animationEnd = Date.now() + duration;
@@ -560,13 +448,21 @@
             }, 250);
         }
 
-        // Intro Animation
-        window.onload = () => {
-            setTimeout(() => {
-                confetti({ particleCount: 100, spread: 100, origin: { y: 0.6 } });
-            }, 500);
-        };
+        // --- 🕰️ LIVE CLOCK ---
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            let ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            document.getElementById('clock').textContent = hours + ':' + minutes + ' ' + ampm;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
     </script>
 </body>
 </html>
+
 
