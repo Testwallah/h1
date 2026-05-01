@@ -1,0 +1,715 @@
+```html
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tank War 1v1 💥</title>
+    <style>
+        /* CSS: रणभूमि (Battlefield) की स्टाइलिंग */
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+        
+        body, html {
+            width: 100%; height: 100%; overflow: hidden;
+            background-color: #1a1a1a; /* डार्क थीम */
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            touch-action: none;
+        }
+
+        #gameCanvas {
+            display: block; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px; /* ग्रिड डिज़ाइन */
+        }
+
+        /* UI लेयर */
+        .ui-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 10;
+        }
+
+        /* हेल्थ बार (Health Bars) */
+        .health-container {
+            position: absolute; top: 20px; width: 100%;
+            display: flex; justify-content: space-between; padding: 0 40px;
+        }
+        
+        .player-info {
+            background: rgba(0, 0, 0, 0.6); padding: 10px 20px;
+            border-radius: 15px; border: 2px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px); display: flex; flex-direction: column; gap: 5px;
+            width: 300px;
+        }
+        
+        .player-info.p1 { border-color: rgba(0, 255, 255, 0.5); }
+        .player-info.p2 { border-color: rgba(255, 50, 50, 0.5); }
+
+        .name-tag { font-weight: bold; color: white; font-size: 16px; text-transform: uppercase; letter-spacing: 1px;}
+        .p1-name { color: #00ffff; }
+        .p2-name { color: #ff3333; text-align: right;}
+
+        .health-bar-bg {
+            width: 100%; height: 20px; background: rgba(255,255,255,0.1);
+            border-radius: 10px; overflow: hidden; position: relative;
+        }
+        
+        .health-fill {
+            height: 100%; transition: width 0.2s ease-out;
+        }
+        #p1Health { background: linear-gradient(90deg, #0088ff, #00ffff); width: 100%; }
+        #p2Health { background: linear-gradient(90deg, #ff8800, #ff3333); width: 100%; float: right;}
+
+        /* मेनू और गेम ओवर स्क्रीन (Glassmorphism) */
+        .panel {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(20, 20, 20, 0.85); backdrop-filter: blur(10px);
+            padding: 40px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(255,255,255,0.05);
+            text-align: center; pointer-events: auto; width: 90%; max-width: 500px;
+        }
+
+        .panel h1 { font-size: 45px; color: #fff; margin-bottom: 10px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        .panel p { font-size: 16px; color: #bbb; margin-bottom: 25px; line-height: 1.5; }
+        
+        .controls-info { background: rgba(0,0,0,0.5); padding: 15px; border-radius: 10px; margin-bottom: 25px;}
+
+        .play-btn {
+            background: linear-gradient(135deg, #ff3333 0%, #ff8800 100%);
+            border: none; padding: 15px 40px; font-size: 22px; font-weight: 900;
+            border-radius: 50px; color: #fff; cursor: pointer;
+            box-shadow: 0 8px 20px rgba(255,50,50,0.4); transition: all 0.2s; text-transform: uppercase;
+        }
+        .play-btn:hover { transform: scale(1.05); }
+        .play-btn:active { transform: scale(0.95); }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <!-- गेम कैनवास -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- UI लेयर -->
+    <div class="ui-layer">
+        
+        <!-- हेल्थ बार्स -->
+        <div class="health-container hidden" id="healthBars">
+            <div class="player-info p1">
+                <div class="name-tag p1-name">P1 (Keyboard) ⌨️</div>
+                <div class="health-bar-bg"><div class="health-fill" id="p1Health"></div></div>
+            </div>
+            <div class="player-info p2">
+                <div class="name-tag p2-name">🖱️ P2 (Mouse)</div>
+                <div class="health-bar-bg"><div class="health-fill" id="p2Health"></div></div>
+            </div>
+        </div>
+
+        <!-- स्टार्ट स्क्रीन -->
+        <div class="panel" id="startScreen">
+            <h1>Tank War 💥</h1>
+            <div class="controls-info">
+                <p style="color: #00ffff; font-weight: bold;">🟦 P1: W, A, S, D से चलाएं | SPACE से फायर</p>
+                <p style="color: #ff3333; font-weight: bold;">🟥 P2: Mouse (माउस) घुमाएं | CLICK से फायर</p>
+            </div>
+            <button class="play-btn" id="startBtn">START BATTLE ⚔️</button>
+        </div>
+
+        <!-- गेम ओवर स्क्रीन -->
+        <div class="panel hidden" id="gameOverScreen">
+            <h1 id="winnerText" style="font-size: 50px;">P1 WINS!</h1>
+            <p>Battle Destroyed the Arena!</p>
+            <button class="play-btn" id="restartBtn">REMATCH 🔄</button>
+        </div>
+
+    </div>
+
+    <script>
+        /* =========================================
+           साउंड इंजन (Web Audio API - Fast & Powerful) 🎵
+           ========================================= */
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new AudioContext();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function playSound(type) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+
+            if (type === 'shoot') {
+                // टैंक फायर (धन्न!)
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(200, now);
+                osc.frequency.exponentialRampToValueAtTime(10, now + 0.3);
+                gainNode.gain.setValueAtTime(0.5, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            } 
+            else if (type === 'hit') {
+                // टैंक को डैमेज (धमाका)
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(100, now);
+                osc.frequency.exponentialRampToValueAtTime(20, now + 0.5);
+                gainNode.gain.setValueAtTime(0.8, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                osc.start(now);
+                osc.stop(now + 0.5);
+            }
+            else if (type === 'bounce') {
+                // गोली दीवार से टकराई (टिंग)
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(600, now);
+                osc.frequency.exponentialRampToValueAtTime(200, now + 0.1);
+                gainNode.gain.setValueAtTime(0.3, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            }
+        }
+
+        /* =========================================
+           गेम सेटअप और कैनवास 🎮
+           ========================================= */
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        const ui = {
+            start: document.getElementById('startScreen'),
+            gameOver: document.getElementById('gameOverScreen'),
+            healthBars: document.getElementById('healthBars'),
+            p1Health: document.getElementById('p1Health'),
+            p2Health: document.getElementById('p2Health'),
+            winner: document.getElementById('winnerText')
+        };
+
+        let currentState = 'START';
+        let animationId;
+        let scale = 1;
+        let screenShake = 0;
+        let frames = 0;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            scale = Math.min(canvas.width, canvas.height) / 800;
+        }
+        window.addEventListener('resize', resizeCanvas);
+
+        /* =========================================
+           गेम के ऑब्जेक्ट्स (Tanks, Bullets, Particles)
+           ========================================= */
+        
+        // 🟦 Player 1 Tank (Keyboard)
+        const t1 = {
+            x: 0, y: 0, angle: 0, 
+            width: 50, height: 40,
+            color: '#00ffff', bodyColor: '#005555',
+            speed: 0, maxSpeed: 4, turnSpeed: 0.05,
+            health: 100,
+            keys: { w: false, a: false, s: false, d: false },
+            cooldown: 0
+        };
+
+        // 🟥 Player 2 Tank (Mouse)
+        const t2 = {
+            x: 0, y: 0, angle: Math.PI, 
+            width: 50, height: 40,
+            color: '#ff3333', bodyColor: '#550000',
+            speed: 0, maxSpeed: 3.5, // P2 माउस से चलता है इसलिए स्पीड बैलेंस की है
+            health: 100,
+            targetX: 0, targetY: 0,
+            isFiring: false,
+            cooldown: 0
+        };
+
+        let bullets = [];
+        let particles = [];
+        let tracks = []; // टैंक के टायर के निशान
+        let walls = [];  // बीच की रुकावटें
+
+        function initLevel() {
+            t1.health = 100; t2.health = 100;
+            t1.x = 100; t1.y = canvas.height / 2; t1.angle = 0;
+            t2.x = canvas.width - 100; t2.y = canvas.height / 2; t2.angle = Math.PI;
+            t2.targetX = t2.x; t2.targetY = t2.y;
+            
+            bullets = []; particles = []; tracks = [];
+            
+            // बीच की दीवारें (Obstacles)
+            let cw = canvas.width; let ch = canvas.height;
+            walls = [
+                {x: cw/2 - 20, y: ch/4, w: 40, h: ch/2}, // बीच की बड़ी दीवार
+                {x: cw/4, y: ch/2 - 50, w: 50, h: 100},  // लेफ्ट ब्लॉक
+                {x: cw*0.75, y: ch/2 - 50, w: 50, h: 100} // राइट ब्लॉक
+            ];
+            
+            updateHealthUI();
+        }
+
+        /* =========================================
+           11th Class Physics & Math Logic ⚛️
+           ========================================= */
+        
+        function updatePhysics() {
+            // --- Tank 1 Update (Keyboard) ---
+            if (t1.keys.w) t1.speed = t1.maxSpeed;
+            else if (t1.keys.s) t1.speed = -t1.maxSpeed * 0.7; // पीछे धीरे जाता है
+            else t1.speed *= 0.8; // घर्षण (Friction)
+
+            if (t1.keys.a) t1.angle -= t1.turnSpeed;
+            if (t1.keys.d) t1.angle += t1.turnSpeed;
+
+            // वेक्टर रेजोल्यूशन (Vector Resolution: v * cosθ, v * sinθ)
+            let t1vx = Math.cos(t1.angle) * t1.speed * scale;
+            let t1vy = Math.sin(t1.angle) * t1.speed * scale;
+            moveTank(t1, t1vx, t1vy);
+
+            // T1 Fire Cooldown
+            if (t1.cooldown > 0) t1.cooldown--;
+
+            // --- Tank 2 Update (Mouse) ---
+            // P2 माउस की तरफ मुड़ता है (Angle calculation using Math.atan2)
+            let dx = t2.targetX - t2.x;
+            let dy = t2.targetY - t2.y;
+            let targetAngle = Math.atan2(dy, dx);
+            
+            // स्मूथ रोटेशन
+            let angleDiff = targetAngle - t2.angle;
+            while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+            while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+            t2.angle += angleDiff * 0.1;
+
+            // माउस अगर दूर है तो आगे बढ़ो (Distance formula)
+            let dist = Math.hypot(dx, dy);
+            if (dist > 50) {
+                t2.speed = t2.maxSpeed;
+            } else {
+                t2.speed *= 0.8;
+            }
+
+            let t2vx = Math.cos(t2.angle) * t2.speed * scale;
+            let t2vy = Math.sin(t2.angle) * t2.speed * scale;
+            moveTank(t2, t2vx, t2vy);
+
+            // T2 Fire Cooldown & Firing
+            if (t2.cooldown > 0) t2.cooldown--;
+            if (t2.isFiring && t2.cooldown <= 0) {
+                fireBullet(t2, 2);
+                t2.isFiring = false; // एक क्लिक = एक फायर
+            }
+
+            // --- Bullets Update ---
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                let b = bullets[i];
+                b.x += b.vx; b.y += b.vy;
+                
+                // स्क्रीन बाउंड्री से टकराना (Elastic Collision / Bouncing)
+                if (b.x < 0 || b.x > canvas.width) { b.vx *= -1; b.bounces++; playSound('bounce'); createSparkles(b.x, b.y, '#fff'); }
+                if (b.y < 0 || b.y > canvas.height) { b.vy *= -1; b.bounces++; playSound('bounce'); createSparkles(b.x, b.y, '#fff'); }
+
+                // दीवारों (Obstacles) से टकराना
+                let hitWall = false;
+                for (let w of walls) {
+                    if (b.x > w.x && b.x < w.x + w.w && b.y > w.y && b.y < w.y + w.h) {
+                        // किस तरफ टकराई? (Simple check)
+                        let leftDist = Math.abs(b.x - w.x);
+                        let rightDist = Math.abs(b.x - (w.x + w.w));
+                        let topDist = Math.abs(b.y - w.y);
+                        let bottomDist = Math.abs(b.y - (w.y + w.h));
+                        
+                        let min = Math.min(leftDist, rightDist, topDist, bottomDist);
+                        if (min === leftDist || min === rightDist) b.vx *= -1;
+                        else b.vy *= -1;
+                        
+                        b.bounces++; hitWall = true; playSound('bounce');
+                        createSparkles(b.x, b.y, '#fff');
+                        break;
+                    }
+                }
+
+                // अगर 2 बार से ज्यादा टकरा गई तो नष्ट
+                if (b.bounces > 1) { bullets.splice(i, 1); continue; }
+
+                // टैंक से टकराना
+                if (b.owner !== 1 && checkCircleCollision(b, t1)) {
+                    takeDamage(t1, 20); bullets.splice(i, 1); continue;
+                }
+                if (b.owner !== 2 && checkCircleCollision(b, t2)) {
+                    takeDamage(t2, 20); bullets.splice(i, 1); continue;
+                }
+            }
+
+            // --- Particles & Tracks Update ---
+            if (frames % 5 === 0) {
+                if (Math.abs(t1.speed) > 1) tracks.push({x: t1.x, y: t1.y, angle: t1.angle, life: 100});
+                if (Math.abs(t2.speed) > 1) tracks.push({x: t2.x, y: t2.y, angle: t2.angle, life: 100});
+            }
+            
+            for (let i = tracks.length - 1; i >= 0; i--) {
+                tracks[i].life -= 0.5;
+                if(tracks[i].life <= 0) tracks.splice(i, 1);
+            }
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                particles[i].x += particles[i].vx;
+                particles[i].y += particles[i].vy;
+                particles[i].life -= 0.05;
+                if(particles[i].life <= 0) particles.splice(i, 1);
+            }
+            
+            frames++;
+        }
+
+        // टैंक को चलाना और दीवारों से रोकना (Collision Prevention)
+        function moveTank(tank, vx, vy) {
+            let nextX = tank.x + vx;
+            let nextY = tank.y + vy;
+            let r = tank.width / 2; // Hitbox radius
+
+            // स्क्रीन बाउंड्री
+            if(nextX - r < 0 || nextX + r > canvas.width) vx = 0;
+            if(nextY - r < 0 || nextY + r > canvas.height) vy = 0;
+
+            // बीच की दीवारें
+            for (let w of walls) {
+                // AABB vs Circle Collision Check (Simplified)
+                let testX = nextX; let testY = nextY;
+                if (nextX < w.x) testX = w.x; else if (nextX > w.x + w.w) testX = w.x + w.w;
+                if (nextY < w.y) testY = w.y; else if (nextY > w.y + w.h) testY = w.y + w.h;
+
+                let distX = nextX - testX; let distY = nextY - testY;
+                let distance = Math.sqrt((distX*distX) + (distY*distY));
+                
+                if (distance <= r) {
+                    vx = 0; vy = 0; // टकरा गए, तो रुक जाओ
+                }
+            }
+
+            tank.x += vx;
+            tank.y += vy;
+        }
+
+        function checkCircleCollision(bullet, tank) {
+            let dx = bullet.x - tank.x; let dy = bullet.y - tank.y;
+            let dist = Math.sqrt(dx*dx + dy*dy);
+            return dist < (tank.width / 2); // टैंक का रेडियस
+        }
+
+        function fireBullet(tank, ownerId) {
+            if (tank.cooldown > 0) return;
+            playSound('shoot');
+            
+            // टैंक के बैरल के सिरे से गोली निकलेगी
+            let barrelLen = tank.width * 0.8 * scale;
+            let startX = tank.x + Math.cos(tank.angle) * barrelLen;
+            let startY = tank.y + Math.sin(tank.angle) * barrelLen;
+            
+            let speed = 12 * scale;
+            bullets.push({
+                x: startX, y: startY,
+                vx: Math.cos(tank.angle) * speed,
+                vy: Math.sin(tank.angle) * speed,
+                owner: ownerId, bounces: 0,
+                color: tank.color
+            });
+
+            tank.cooldown = 30; // 30 फ्रेम्स का रेस्ट (आधा सेकंड)
+            
+            // पीछे धकेलने का इफ़ेक्ट (Recoil)
+            tank.x -= Math.cos(tank.angle) * 5;
+            tank.y -= Math.sin(tank.angle) * 5;
+            
+            // बैरल पर धुआं
+            createSparkles(startX, startY, '#ffaa00');
+        }
+
+        function takeDamage(tank, amount) {
+            tank.health -= amount;
+            playSound('hit');
+            screenShake = 15;
+            createExplosion(tank.x, tank.y, tank.color);
+            updateHealthUI();
+
+            if (tank.health <= 0) {
+                createExplosion(tank.x, tank.y, '#ffffff'); // बड़ा धमाका
+                endGame(tank === t2 ? 1 : 2); // जो मरा, दूसरा जीत गया
+            }
+        }
+
+        function createExplosion(x, y, color) {
+            for(let i=0; i<30; i++){
+                particles.push({
+                    x: x, y: y,
+                    vx: (Math.random() - 0.5) * 10 * scale,
+                    vy: (Math.random() - 0.5) * 10 * scale,
+                    life: 1.0, color: color, size: Math.random() * 8 + 4
+                });
+            }
+        }
+        function createSparkles(x, y, color) {
+            for(let i=0; i<10; i++){
+                particles.push({
+                    x: x, y: y,
+                    vx: (Math.random() - 0.5) * 5 * scale,
+                    vy: (Math.random() - 0.5) * 5 * scale,
+                    life: 0.8, color: color, size: Math.random() * 4 + 2
+                });
+            }
+        }
+
+        /* =========================================
+           ड्राइंग (Drawing the Game) 🎨
+           ========================================= */
+        function drawTank(tank) {
+            ctx.save();
+            ctx.translate(tank.x, tank.y);
+            ctx.rotate(tank.angle);
+            
+            let w = tank.width * scale; let h = tank.height * scale;
+
+            // टैंक के टायर (Treads)
+            ctx.fillStyle = '#0a0a0a';
+            ctx.fillRect(-w/2 - 2, -h/2 - 4, w + 4, 10); // ऊपर वाला टायर
+            ctx.fillRect(-w/2 - 2, h/2 - 6, w + 4, 10);  // नीचे वाला टायर
+
+            // मुख्य शरीर (Body)
+            ctx.fillStyle = tank.bodyColor;
+            ctx.fillRect(-w/2, -h/2, w, h);
+            
+            ctx.strokeStyle = tank.color; ctx.lineWidth = 2;
+            ctx.strokeRect(-w/2, -h/2, w, h);
+
+            // बैरल (Gun)
+            ctx.fillStyle = '#444';
+            ctx.fillRect(0, -5 * scale, w * 0.8, 10 * scale);
+            ctx.strokeStyle = tank.color;
+            ctx.strokeRect(0, -5 * scale, w * 0.8, 10 * scale);
+
+            // टर्रेट (Turret - गोल हिस्सा)
+            ctx.beginPath();
+            ctx.arc(0, 0, 15 * scale, 0, Math.PI * 2);
+            ctx.fillStyle = tank.color;
+            ctx.fill();
+            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.arc(0, 0, 10 * scale, 0, Math.PI * 2);
+            ctx.fill();
+
+            // अगर हेल्थ कम है तो धुआं निकलेगा
+            if(tank.health <= 30 && frames % 5 === 0) {
+                particles.push({
+                    x: tank.x, y: tank.y,
+                    vx: 0, vy: -2, life: 0.8, color: '#555', size: 10
+                });
+            }
+
+            ctx.restore();
+        }
+
+        function drawGame() {
+            // कैनवास साफ़ करें (Canvas background handle through CSS, just clear here)
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // स्क्रीन शेक
+            ctx.save();
+            if (screenShake > 0) {
+                ctx.translate((Math.random() - 0.5) * screenShake, (Math.random() - 0.5) * screenShake);
+                screenShake -= 1;
+            }
+
+            // ट्रैक (निशान) ड्रा करें
+            for(let tr of tracks) {
+                ctx.save();
+                ctx.translate(tr.x, tr.y); ctx.rotate(tr.angle);
+                ctx.fillStyle = `rgba(0,0,0,${tr.life/200})`; // हल्का काला रंग
+                let w = t1.width * scale; let h = t1.height * scale;
+                ctx.fillRect(-w/2, -h/2 - 2, 8, 4);
+                ctx.fillRect(-w/2, h/2 - 2, 8, 4);
+                ctx.restore();
+            }
+
+            // दीवारें (Obstacles)
+            for(let w of walls) {
+                ctx.fillStyle = '#333';
+                ctx.fillRect(w.x, w.y, w.w, w.h);
+                // नियन बॉर्डर (Neon effect)
+                ctx.strokeStyle = '#555'; ctx.lineWidth = 2;
+                ctx.strokeRect(w.x, w.y, w.w, w.h);
+            }
+
+            // पार्टिकल्स
+            for(let p of particles) {
+                ctx.globalAlpha = p.life;
+                ctx.fillStyle = p.color;
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
+            }
+            ctx.globalAlpha = 1.0;
+
+            // बुलेट्स (गोलियां)
+            for(let b of bullets) {
+                ctx.fillStyle = '#fff';
+                ctx.beginPath(); ctx.arc(b.x, b.y, 5 * scale, 0, Math.PI*2); ctx.fill();
+                // ग्लो इफ़ेक्ट
+                ctx.fillStyle = b.color;
+                ctx.globalAlpha = 0.5;
+                ctx.beginPath(); ctx.arc(b.x, b.y, 10 * scale, 0, Math.PI*2); ctx.fill();
+                ctx.globalAlpha = 1.0;
+            }
+
+            // टैंक्स
+            if(t1.health > 0) drawTank(t1);
+            if(t2.health > 0) drawTank(t2);
+
+            // P2 माउस कर्सर टारगेट 
+            if(currentState === 'PLAYING') {
+                ctx.beginPath();
+                ctx.arc(t2.targetX, t2.targetY, 15, 0, Math.PI*2);
+                ctx.strokeStyle = 'rgba(255, 50, 50, 0.5)';
+                ctx.lineWidth = 2; ctx.stroke();
+                ctx.moveTo(t2.targetX-20, t2.targetY); ctx.lineTo(t2.targetX+20, t2.targetY);
+                ctx.moveTo(t2.targetX, t2.targetY-20); ctx.lineTo(t2.targetX, t2.targetY+20);
+                ctx.stroke();
+            }
+
+            ctx.restore(); // शेक ख़त्म
+        }
+
+        /* =========================================
+           गेम लूप और UI 🔄
+           ========================================= */
+        function updateHealthUI() {
+            ui.p1Health.style.width = Math.max(0, t1.health) + '%';
+            ui.p2Health.style.width = Math.max(0, t2.health) + '%';
+        }
+
+        function loop() {
+            if (currentState === 'PLAYING') {
+                updatePhysics();
+            }
+            drawGame();
+            if(currentState !== 'STOPPED') animationId = requestAnimationFrame(loop);
+        }
+
+        function startGame() {
+            initAudio();
+            currentState = 'PLAYING';
+            initLevel();
+
+            ui.start.classList.add('hidden');
+            ui.gameOver.classList.add('hidden');
+            ui.healthBars.classList.remove('hidden');
+        }
+
+        function endGame(winnerId) {
+            currentState = 'GAMEOVER';
+            ui.healthBars.classList.add('hidden');
+            ui.gameOver.classList.remove('hidden');
+
+            if(winnerId === 1) {
+                ui.winner.innerText = "🟦 P1 (Keyboard) WINS!";
+                ui.winner.style.color = "#00ffff";
+            } else {
+                ui.winner.innerText = "🟥 P2 (Mouse) WINS!";
+                ui.winner.style.color = "#ff3333";
+            }
+        }
+
+        /* =========================================
+           इनपुट्स (Keyboard, Mouse, Touch) ⌨️🖱️📱
+           ========================================= */
+
+        // --- Player 1: Keyboard ---
+        window.addEventListener('keydown', (e) => {
+            if(currentState !== 'PLAYING') return;
+            const key = e.key.toLowerCase();
+            if (key === 'w' || e.code === 'ArrowUp') t1.keys.w = true;
+            if (key === 's' || e.code === 'ArrowDown') t1.keys.s = true;
+            if (key === 'a' || e.code === 'ArrowLeft') t1.keys.a = true;
+            if (key === 'd' || e.code === 'ArrowRight') t1.keys.d = true;
+            if (e.code === 'Space') {
+                e.preventDefault(); // पेज स्क्रॉल रोके
+                initAudio();
+                fireBullet(t1, 1);
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            const key = e.key.toLowerCase();
+            if (key === 'w' || e.code === 'ArrowUp') t1.keys.w = false;
+            if (key === 's' || e.code === 'ArrowDown') t1.keys.s = false;
+            if (key === 'a' || e.code === 'ArrowLeft') t1.keys.a = false;
+            if (key === 'd' || e.code === 'ArrowRight') t1.keys.d = false;
+        });
+
+        // --- Player 2: Mouse (Aiming & Moving) ---
+        canvas.addEventListener('mousemove', (e) => {
+            if(currentState !== 'PLAYING') return;
+            // P2 (लाल टैंक) हमेशा माउस के कर्सर की तरफ देखेगा और आगे बढ़ेगा
+            t2.targetX = e.clientX;
+            t2.targetY = e.clientY;
+        });
+
+        canvas.addEventListener('mousedown', (e) => {
+            if(currentState !== 'PLAYING') return;
+            initAudio();
+            t2.isFiring = true; // क्लिक करते ही फायर
+        });
+
+        // --- Mobile Touch Support (दोनों प्लेयर्स के लिए) ---
+        canvas.addEventListener('touchmove', (e) => {
+            if(currentState !== 'PLAYING') return;
+            e.preventDefault();
+            for (let i = 0; i < e.touches.length; i++) {
+                let t = e.touches[i];
+                if (t.clientX > canvas.width / 2) {
+                    // Right Side (P2)
+                    t2.targetX = t.clientX;
+                    t2.targetY = t.clientY;
+                }
+            }
+        }, {passive: false});
+
+        canvas.addEventListener('touchstart', (e) => {
+            if(currentState !== 'PLAYING') return;
+            e.preventDefault();
+            for (let i = 0; i < e.touches.length; i++) {
+                let t = e.touches[i];
+                if (t.clientX < canvas.width / 2) {
+                    // Left Side (P1) - मोबाइल पर लेफ्ट साइड टैप करने से P1 फायर करेगा 
+                    // (क्यूंकि मोबाइल पर WASD नहीं है, P1 को मोबाइल पर सिर्फ टैप टू फायर रखा है, 
+                    // या फिर पीसी पर कीबोर्ड यूज़ करें)
+                    fireBullet(t1, 1);
+                } else {
+                    // Right Side (P2)
+                    t2.targetX = t.clientX;
+                    t2.targetY = t.clientY;
+                    t2.isFiring = true;
+                }
+            }
+        }, {passive: false});
+
+        // UI Buttons
+        document.getElementById('startBtn').addEventListener('click', startGame);
+        document.getElementById('restartBtn').addEventListener('click', startGame);
+
+        // शुरुआत
+        resizeCanvas();
+        initLevel();
+        loop(); 
+
+    </script>
+</body>
+</html>
+
+
+```
