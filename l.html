@@ -3,20 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tank Royale 100% Working 💥</title>
+    <title>Tank Royale 3D 💥 - 4K Masterpiece</title>
     <style>
-        /* CSS: एकदम बेसिक और मजबूत */
-        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+        /* CSS: 4K प्रीमियम UI डिज़ाइन */
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; outline: none; }
         
         body, html {
-            width: 100%; height: 100%; overflow: hidden; /* नो स्क्रॉलिंग */
-            background-color: #1a2618; /* आर्मी ग्रीन */
+            width: 100%; height: 100%; overflow: hidden; /* पेज स्क्रॉलिंग एकदम बंद */
+            background-color: #162214; /* डार्क 4K ग्रास बैकग्राउंड */
             font-family: 'Segoe UI', Tahoma, sans-serif;
             touch-action: none;
         }
 
         #gameCanvas {
             display: block; width: 100%; height: 100%;
+            cursor: crosshair; /* P1 के लिए कर्सर */
         }
 
         /* 🎛️ UI लेयर */
@@ -25,38 +26,72 @@
             pointer-events: none; z-index: 10;
         }
 
-        /* हेल्थ बार्स */
+        /* 3 Players के हेल्थ बार्स */
         .health-container {
-            position: absolute; top: 10px; width: 100%;
-            display: flex; justify-content: space-around; padding: 0 10px;
+            position: absolute; top: 20px; width: 100%;
+            display: flex; justify-content: space-around; padding: 0 40px; gap: 20px;
         }
+        
         .player-info {
-            background: rgba(0, 0, 0, 0.7); padding: 5px 10px;
-            border-radius: 8px; border: 1px solid rgba(255,255,255,0.3);
-            width: 30%; max-width: 250px; text-align: center;
+            background: rgba(10, 15, 10, 0.85); padding: 12px 25px;
+            border-radius: 12px; border: 1px solid rgba(255,255,255,0.15);
+            backdrop-filter: blur(20px); box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            display: flex; flex-direction: column; gap: 8px; width: 30%; max-width: 350px;
         }
-        .name-tag { font-weight: bold; color: white; font-size: 14px; margin-bottom: 5px;}
-        .health-bar-bg { width: 100%; height: 15px; background: #333; border-radius: 5px; overflow: hidden; }
-        .health-fill { height: 100%; transition: width 0.2s; }
-        #p1Health { background: red; width: 100%; }
-        #p2Health { background: blue; width: 100%; }
-        #p3Health { background: lime; width: 100%; }
+        
+        .player-info.p1 { border-top: 4px solid #ff3333; }
+        .player-info.p2 { border-top: 4px solid #0088ff; }
+        .player-info.p3 { border-top: 4px solid #00ff55; }
 
-        /* मेनू (इसे मैंने बहुत सिंपल कर दिया है ताकि कोई ग्लिच ना हो) */
-        #startScreen, #gameOverScreen {
+        .name-tag { font-weight: 900; color: white; font-size: 16px; text-transform: uppercase; letter-spacing: 1.5px;}
+        .p1-name { color: #ff4d4d; }
+        .p2-name { color: #4da6ff; }
+        .p3-name { color: #4dff88; }
+
+        .health-bar-bg {
+            width: 100%; height: 22px; background: #1a1a1a;
+            border-radius: 12px; overflow: hidden; border: 1px solid #444;
+            box-shadow: inset 0 3px 8px rgba(0,0,0,0.9);
+        }
+        
+        .health-fill { height: 100%; transition: width 0.2s ease-out; box-shadow: inset 0 2px 5px rgba(255,255,255,0.4); }
+        #p1Health { background: linear-gradient(90deg, #aa0000, #ff3333); width: 100%; }
+        #p2Health { background: linear-gradient(90deg, #0033aa, #0088ff); width: 100%; }
+        #p3Health { background: linear-gradient(90deg, #008822, #00ff55); width: 100%; }
+
+        /* ⚠️ ज़ोन वार्निंग */
+        #zoneWarning {
+            position: absolute; top: 110px; left: 50%; transform: translateX(-50%);
+            color: #ff1111; font-size: 30px; font-weight: 900; letter-spacing: 3px;
+            text-shadow: 0 0 25px #ff0000; animation: pulseZone 0.8s infinite;
+            display: none; background: rgba(0,0,0,0.7); padding: 8px 30px; border-radius: 10px;
+            border: 1px solid #ff0000;
+        }
+        @keyframes pulseZone { 0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); } 50% { opacity: 0.5; transform: translateX(-50%) scale(1.05); } }
+
+        /* 🖥️ मेनू स्क्रीन */
+        .panel {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(20, 30, 20, 0.95); padding: 30px; border-radius: 15px;
-            border: 2px solid #aaa; text-align: center; pointer-events: auto;
-            width: 90%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            background: linear-gradient(135deg, rgba(25, 30, 25, 0.95), rgba(10, 15, 10, 0.98));
+            padding: 40px; border-radius: 20px; border: 2px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 1);
+            text-align: center; pointer-events: auto; width: 95%; max-width: 700px;
         }
 
-        h1 { color: #fff; font-size: 35px; margin-bottom: 20px; }
-        p { color: #ccc; font-size: 16px; margin-bottom: 10px; }
+        .panel h1 { font-size: 48px; color: #fff; margin-bottom: 5px; text-shadow: 0 5px 20px rgba(0,0,0,0.9); }
+        .panel h1 span { color: #ffaa00; }
+        
+        .controls-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin: 30px 0; }
+        .ctrl-box { background: rgba(0,0,0,0.6); padding: 20px 15px; border-radius: 15px; border: 1px solid #333; box-shadow: inset 0 0 20px rgba(0,0,0,0.8);}
+        .ctrl-box h3 { font-size: 19px; margin-bottom: 12px; text-shadow: 2px 2px 5px #000; }
+        .ctrl-box p { font-size: 14px; color: #ccc; line-height: 1.6;}
 
+        /* प्ले बटन */
         .play-btn {
-            background: #ff5500; border: 2px solid #fff; padding: 15px 40px; 
-            font-size: 24px; font-weight: bold; border-radius: 30px; color: #fff; 
-            cursor: pointer; margin-top: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            background: linear-gradient(135deg, #ff8800 0%, #ff2200 100%);
+            border: 2px solid #ffaa00; padding: 18px 60px; font-size: 26px; font-weight: 900;
+            border-radius: 50px; color: #fff; cursor: pointer;
+            box-shadow: 0 10px 40px rgba(255,50,0,0.6); transition: transform 0.1s; text-transform: uppercase;
         }
         .play-btn:active { transform: scale(0.95); }
 
@@ -65,199 +100,329 @@
 </head>
 <body>
 
+    <!-- गेम कैनवास -->
     <canvas id="gameCanvas"></canvas>
 
     <div class="ui-layer">
-        
+        <div id="zoneWarning">⚠️ SAFE ZONE SHRINKING! ⚠️</div>
+
         <div class="health-container hidden" id="healthBars">
-            <div class="player-info" style="border-color: red;">
-                <div class="name-tag" style="color: red;">P1 (Mouse)</div>
+            <div class="player-info p1">
+                <div class="name-tag p1-name">🔴 P1 (Mouse)</div>
                 <div class="health-bar-bg"><div class="health-fill" id="p1Health"></div></div>
             </div>
-            <div class="player-info" style="border-color: #3388ff;">
-                <div class="name-tag" style="color: #3388ff;">P2 (Arrows)</div>
+            <div class="player-info p2">
+                <div class="name-tag p2-name">🔵 P2 (Arrows)</div>
                 <div class="health-bar-bg"><div class="health-fill" id="p2Health"></div></div>
             </div>
-            <div class="player-info" style="border-color: lime;">
-                <div class="name-tag" style="color: lime;">P3 (WASD)</div>
+            <div class="player-info p3">
+                <div class="name-tag p3-name">🟢 P3 (WASD)</div>
                 <div class="health-bar-bg"><div class="health-fill" id="p3Health"></div></div>
             </div>
         </div>
 
-        <!-- एकदम सिंपल स्टार्ट स्क्रीन -->
-        <div id="startScreen">
-            <h1>Tank Battle 3P 💥</h1>
-            <p>🔴 <b>P1:</b> Mouse & Click</p>
-            <p>🔵 <b>P2:</b> Arrows ⬆️⬇️ & ENTER</p>
-            <p>🟢 <b>P3:</b> W,A,S,D & SPACE</p>
-            <button class="play-btn" id="startBtn">START GAME 🚀</button>
+        <div class="panel" id="startScreen">
+            <h1>Tank Royale <span>4K Arena</span> 💥</h1>
+            <p style="color:#aaa; font-size: 17px; font-weight:bold;">Balanced Physics • Tap To Fire • Symmetrical Map</p>
+            
+            <div class="controls-grid">
+                <div class="ctrl-box" style="border-top: 3px solid #ff4d4d;">
+                    <h3 style="color: #ff4d4d;">P1 (RED)</h3>
+                    <p><b>Move:</b> Follows Mouse<br><b>Fire:</b> Left Click (Tap)</p>
+                </div>
+                <div class="ctrl-box" style="border-top: 3px solid #4da6ff;">
+                    <h3 style="color: #4da6ff;">P2 (BLUE)</h3>
+                    <p><b>Move:</b> Arrows ⬆️⬇️⬅️➡️<br><b>Fire:</b> Numpad 0 / Enter</p>
+                </div>
+                <div class="ctrl-box" style="border-top: 3px solid #4dff88;">
+                    <h3 style="color: #4dff88;">P3 (GREEN)</h3>
+                    <p><b>Move:</b> W, A, S, D<br><b>Fire:</b> SPACEBAR</p>
+                </div>
+            </div>
+
+            <button class="play-btn" onclick="startGame()">ENTER ARENA ⚔️</button>
         </div>
 
-        <div id="gameOverScreen" class="hidden">
-            <h1 id="winnerText">BOOYAH!</h1>
-            <button class="play-btn" id="restartBtn">REMATCH 🔄</button>
+        <div class="panel hidden" id="gameOverScreen">
+            <h1 id="winnerText" style="font-size: 55px; margin-bottom: 20px;">BOOYAH!</h1>
+            <button class="play-btn" onclick="startGame()">REMATCH 🔄</button>
         </div>
     </div>
 
     <script>
         // ==========================================
-        // 🎮 GAME VARIABLES & SETUP
+        // 🎵 CRASH-PROOF AUDIO ENGINE
+        // ==========================================
+        let audioCtx;
+        function initAudio() {
+            try {
+                if (!audioCtx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if(AudioContext) audioCtx = new AudioContext();
+                }
+                if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+            } catch(e) {}
+        }
+
+        function playSound(type) {
+            try {
+                if (!audioCtx) return;
+                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                const now = audioCtx.currentTime;
+
+                if (type === 'shoot') {
+                    osc.type = 'square'; osc.frequency.setValueAtTime(250, now);
+                    osc.frequency.exponentialRampToValueAtTime(10, now + 0.2);
+                    gain.gain.setValueAtTime(0.4, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                    osc.start(now); osc.stop(now + 0.2);
+                } else if (type === 'explosion') {
+                    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(100, now);
+                    osc.frequency.exponentialRampToValueAtTime(10, now + 0.8);
+                    gain.gain.setValueAtTime(0.8, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
+                    osc.start(now); osc.stop(now + 0.8);
+                } else if (type === 'bounce') {
+                    osc.type = 'triangle'; osc.frequency.setValueAtTime(800, now);
+                    osc.frequency.exponentialRampToValueAtTime(200, now + 0.1);
+                    gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                    osc.start(now); osc.stop(now + 0.1);
+                }
+            } catch(e) {} 
+        }
+
+        // ==========================================
+        // 🎮 GAME SETUP & INPUTS
         // ==========================================
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
         let currentState = 'START';
-        let scale = 1;
-        let tanks = [], bullets = [], walls = [];
+        let scale = 1; let screenShake = 0; let frames = 0;
+        let tanks = [], bullets = [], particles = [], crates = [], walls = [];
+        let safeZone = { x: 0, y: 0, radius: 2000 };
 
-        // Inputs
+        // 🤫 Secret Power Flag
+        let p3SecretMode = false;
+
         const keys = {};
-        let mouseX = 0, mouseY = 0, mouseClicked = false;
+        let mouseX = 0, mouseY = 0;
 
-        // की-बोर्ड स्क्रॉलिंग रोको (Fix)
+        // की-बोर्ड स्क्रॉलिंग बंद करना और Keys ट्रैक करना
         window.addEventListener('keydown', e => { 
             keys[e.code] = true; 
-            if(['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter'].includes(e.code)) {
+            if(['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', 'Numpad0', 'NumpadEnter'].includes(e.code)) {
                 e.preventDefault(); 
+            }
+            // 🤫 Secret Cheat Code Tracker (CapsLock)
+            if (e.code === 'CapsLock') {
+                p3SecretMode = !p3SecretMode; // टॉगल
             }
         });
         window.addEventListener('keyup', e => { keys[e.code] = false; });
-        
-        // माउस
         canvas.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
-        canvas.addEventListener('mousedown', e => { mouseClicked = true; });
-        canvas.addEventListener('mouseup', e => { mouseClicked = false; });
+        
+        // P1 फायर कंट्रोल: सिर्फ एक बार क्लिक करने (Tap) पर गोली चलेगी, होल्ड करने पर नहीं!
+        canvas.addEventListener('mousedown', e => { 
+            initAudio();
+            if(currentState === 'PLAYING' && tanks[0] && tanks[0].alive && tanks[0].cooldown <= 0) {
+                fireBullet(tanks[0]);
+            }
+        });
 
         function resizeCanvas() {
-            canvas.width = window.innerWidth; 
-            canvas.height = window.innerHeight;
-            scale = Math.min(canvas.width, canvas.height) / 800;
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            scale = Math.min(canvas.width, canvas.height) / 900;
         }
         window.addEventListener('resize', resizeCanvas);
 
         // ==========================================
-        // 🌍 MAP GENERATION
+        // 🚀 START GAME FUNCTION
+        // ==========================================
+        function startGame() {
+            try {
+                window.focus(); // गेम पर फोकस ताकि की-बोर्ड काम करे
+                p3SecretMode = false; // हर नए मैच में सीक्रेट बंद रहेगा, खुद दबाना पड़ेगा
+                document.getElementById('startScreen').classList.add('hidden');
+                document.getElementById('gameOverScreen').classList.add('hidden');
+                document.getElementById('healthBars').classList.remove('hidden');
+                
+                initAudio(); 
+                initMap();   
+                currentState = 'PLAYING'; 
+            } catch (error) { console.error(error); }
+        }
+
+        // ==========================================
+        // 🌍 4K SYMMETRICAL ARENA MAP
         // ==========================================
         function initMap() {
             let cw = canvas.width; let ch = canvas.height;
-            walls = []; bullets = [];
+            crates = []; walls = []; bullets = []; particles = [];
+            safeZone.x = cw / 2; safeZone.y = ch / 2; safeZone.radius = Math.max(cw, ch) * 0.8;
             
-            // सिंपल दीवारें
+            // 🏰 Center Bunker (बीच का किला)
+            walls.push({ x: cw/2 - 120*scale, y: ch/2 - 120*scale, w: 240*scale, h: 20*scale, z: 30*scale }); // Top
+            walls.push({ x: cw/2 - 120*scale, y: ch/2 + 100*scale, w: 240*scale, h: 20*scale, z: 30*scale }); // Bottom
+            
+            // 🗼 4 Pillars in corners (ऊँचे खम्भे)
+            walls.push({ x: cw/4, y: ch/4, w: 50*scale, h: 50*scale, z: 60*scale });
+            walls.push({ x: cw*0.75, y: ch/4, w: 50*scale, h: 50*scale, z: 60*scale });
+            walls.push({ x: cw/4, y: ch*0.75, w: 50*scale, h: 50*scale, z: 60*scale });
+            walls.push({ x: cw*0.75, y: ch*0.75, w: 50*scale, h: 50*scale, z: 60*scale });
+
+            // 📦 Random Crates around the bunker
             for(let i=0; i<8; i++) {
-                walls.push({ 
-                    x: Math.random()*(cw-200)+100, 
-                    y: Math.random()*(ch-200)+100, 
-                    w: 80*scale, h: 40*scale 
-                });
+                crates.push({ x: Math.random()*(cw-200)+100, y: Math.random()*(ch-200)+100, w: 45*scale, h: 45*scale, z: 25*scale, hp: 40 });
             }
 
-            // 3 टैंक्स 
+            // ⚔️ 3 Players Initialization (Balanced Stats)
             tanks = [
-                { id: 1, name: 'P1', x: 100, y: 100, vx: 0, vy: 0, angle: 0, color: 'red', hp: 100, speed: 4*scale, cooldown: 0, alive: true },
-                { id: 2, name: 'P2', x: cw-100, y: 100, vx: 0, vy: 0, angle: Math.PI, color: '#3388ff', hp: 100, speed: 4.5*scale, cooldown: 0, alive: true },
-                { id: 3, name: 'P3', x: cw/2, y: ch-100, vx: 0, vy: 0, angle: -Math.PI/2, color: 'lime', hp: 100, speed: 4.5*scale, cooldown: 0, alive: true }
+                // P1: Mouse (Nerfed Speed)
+                { id: 1, name: 'P1', x: 100*scale, y: ch/2, vx: 0, vy: 0, angle: 0, color: '#ff3333', hp: 100, maxSpeed: 3.5*scale, fireRate: 35, cooldown: 0, alive: true, zBody: 10*scale, zTurret: 15*scale },
+                // P2: Keyboard 1 (Fast Speed)
+                { id: 2, name: 'P2', x: cw - 100*scale, y: ch/2, vx: 0, vy: 0, angle: Math.PI, color: '#3388ff', hp: 100, maxSpeed: 5*scale, fireRate: 25, cooldown: 0, alive: true, zBody: 10*scale, zTurret: 15*scale },
+                // P3: Keyboard 2 (Fast Speed)
+                { id: 3, name: 'P3', x: cw/2, y: ch - 100*scale, vx: 0, vy: 0, angle: -Math.PI/2, color: '#33ff55', hp: 100, maxSpeed: 5*scale, fireRate: 25, cooldown: 0, alive: true, zBody: 10*scale, zTurret: 15*scale }
             ];
             updateHealthUI();
         }
 
         // ==========================================
-        // ⚛️ PHYSICS ENGINE (SIMPLE & SOLID)
+        // ⚛️ PHYSICS ENGINE (Movement & Hacks)
         // ==========================================
         function updatePhysics() {
+            if(frames % 60 === 0 && safeZone.radius > 150*scale) safeZone.radius -= 3 * scale;
+            document.getElementById('zoneWarning').style.display = (safeZone.radius < 400*scale) ? 'block' : 'none';
+
             const friction = 0.85; 
-            const accel = 1 * scale;
+            const accelMouse = 0.6 * scale; // P1 का त्वरण कम
+            const accelKey = 0.95 * scale;  // P2, P3 का त्वरण ज़्यादा (Fast)
 
             tanks.forEach(t => {
                 if(!t.alive) return;
-                
-                let targetVx = 0, targetVy = 0;
-                let isMoving = false;
+                let moving = false; let targetVx = 0, targetVy = 0;
 
-                // कंट्रोल्स (Controls)
-                if (t.id === 1) { // P1 Mouse
+                // 🤫 SECRET HACK ACTIVATION (P3 ONLY)
+                if (t.id === 3 && p3SecretMode) {
+                    t.hp = Math.min(100, t.hp + 0.5); // Auto Heal! (चुपके से हेल्थ बढ़ती रहेगी)
+                    t.fireRate = 12; // मशीन गन जैसी स्पीड
+                    t.maxSpeed = 6 * scale; // सबसे तेज़
+                }
+
+                // 🎮 CONTROLS
+                if (t.id === 1) { 
+                    // P1: Mouse
                     let dx = mouseX - t.x; let dy = mouseY - t.y;
                     let dist = Math.hypot(dx, dy);
                     t.angle = Math.atan2(dy, dx);
-                    if (dist > 30) { targetVx = Math.cos(t.angle)*accel; targetVy = Math.sin(t.angle)*accel; isMoving=true; }
-                    if (mouseClicked && t.cooldown <= 0) fireBullet(t);
-                } 
-                else if (t.id === 2) { // P2 Arrows
-                    if (keys['ArrowUp']) { targetVy -= accel; isMoving=true; }
-                    if (keys['ArrowDown']) { targetVy += accel; isMoving=true; }
-                    if (keys['ArrowLeft']) { targetVx -= accel; isMoving=true; }
-                    if (keys['ArrowRight']) { targetVx += accel; isMoving=true; }
-                    if(isMoving) t.angle = Math.atan2(targetVy, targetVx);
-                    if (keys['Enter'] && t.cooldown <= 0) fireBullet(t);
-                } 
-                else if (t.id === 3) { // P3 WASD
-                    if (keys['KeyW']) { targetVy -= accel; isMoving=true; }
-                    if (keys['KeyS']) { targetVy += accel; isMoving=true; }
-                    if (keys['KeyA']) { targetVx -= accel; isMoving=true; }
-                    if (keys['KeyD']) { targetVx += accel; isMoving=true; }
-                    if(isMoving) t.angle = Math.atan2(targetVy, targetVx);
+                    if (dist > 30) { targetVx = Math.cos(t.angle)*accelMouse; targetVy = Math.sin(t.angle)*accelMouse; moving = true; }
+                    // Note: P1 Fire is handled entirely in 'mousedown' event now. No automatic fire here.
+                } else if (t.id === 2) { 
+                    // P2: Arrows + Right Side Buttons (Numpad 0 / Enter)
+                    if (keys['ArrowUp']) { targetVy -= accelKey; moving = true; }
+                    if (keys['ArrowDown']) { targetVy += accelKey; moving = true; }
+                    if (keys['ArrowLeft']) { targetVx -= accelKey; moving = true; }
+                    if (keys['ArrowRight']) { targetVx += accelKey; moving = true; }
+                    if (moving) t.angle = Math.atan2(targetVy, targetVx);
+                    // Fire with Numpad 0, Numpad Enter, or Normal Enter
+                    if ((keys['Numpad0'] || keys['NumpadEnter'] || keys['Enter']) && t.cooldown <= 0) fireBullet(t);
+                } else if (t.id === 3) { 
+                    // P3: WASD + Space
+                    if (keys['KeyW']) { targetVy -= accelKey; moving = true; }
+                    if (keys['KeyS']) { targetVy += accelKey; moving = true; }
+                    if (keys['KeyA']) { targetVx -= accelKey; moving = true; }
+                    if (keys['KeyD']) { targetVx += accelKey; moving = true; }
+                    if (moving) t.angle = Math.atan2(targetVy, targetVx);
                     if (keys['Space'] && t.cooldown <= 0) fireBullet(t);
                 }
 
-                // स्पीड और घर्षण
                 t.vx += targetVx; t.vy += targetVy;
                 t.vx *= friction; t.vy *= friction;
 
-                // स्पीड लिमिट
-                let currentSpeed = Math.hypot(t.vx, t.vy);
-                if (currentSpeed > t.speed) { 
-                    t.vx = (t.vx/currentSpeed)*t.speed; 
-                    t.vy = (t.vy/currentSpeed)*t.speed; 
-                }
+                let speed = Math.hypot(t.vx, t.vy);
+                if (speed > t.maxSpeed) { t.vx = (t.vx/speed)*t.maxSpeed; t.vy = (t.vy/speed)*t.maxSpeed; }
 
                 t.x += t.vx; t.y += t.vy;
 
-                // बाउंड्री रोकना
                 let r = 20 * scale;
                 t.x = Math.max(r, Math.min(canvas.width - r, t.x));
                 t.y = Math.max(r, Math.min(canvas.height - r, t.y));
 
-                // दीवार से टकराव 
                 walls.forEach(w => resolveAABB(t, w));
+                crates.forEach(c => resolveAABB(t, c));
+
+                tanks.forEach(other => {
+                    if(t.id !== other.id && other.alive) {
+                        let dx = t.x - other.x, dy = t.y - other.y;
+                        let dist = Math.hypot(dx, dy);
+                        if(dist < r*2) {
+                            let overlap = (r*2 - dist)*0.5;
+                            t.x += (dx/dist)*overlap; t.y += (dy/dist)*overlap;
+                        }
+                    }
+                });
 
                 if(t.cooldown > 0) t.cooldown--;
+
+                if (Math.hypot(t.x - safeZone.x, t.y - safeZone.y) > safeZone.radius) {
+                    if (frames % 30 === 0) { t.hp -= 5; updateHealthUI(); checkDeath(t); }
+                }
+
+                if (moving && frames % 5 === 0) {
+                    particles.push({ type: 'track', x: t.x, y: t.y, angle: t.angle, life: 1.0 });
+                }
             });
 
-            // गोलियां (Bullets)
+            // 🔫 Bullet Physics
             for (let i = bullets.length - 1; i >= 0; i--) {
-                let b = bullets[i]; 
-                b.x += b.vx; b.y += b.vy;
+                let b = bullets[i]; b.x += b.vx; b.y += b.vy;
                 let destroyed = false;
 
-                // स्क्रीन के बाहर
-                if (b.x<0 || b.x>canvas.width || b.y<0 || b.y>canvas.height) destroyed = true;
+                if (b.x<0 || b.x>canvas.width || b.y<0 || b.y>canvas.height) { destroyed = true; createSparks(b.x, b.y, '#fff'); }
 
-                // दीवार से टकराना (Bounce)
                 walls.forEach(w => {
                     if(b.x > w.x && b.x < w.x+w.w && b.y > w.y && b.y < w.y+w.h) {
                         let fL = Math.abs(b.x-w.x), fR = Math.abs(b.x-(w.x+w.w));
                         let fT = Math.abs(b.y-w.y), fB = Math.abs(b.y-(w.y+w.h));
                         let min = Math.min(fL, fR, fT, fB);
                         if(min === fL || min === fR) b.vx *= -1; else b.vy *= -1;
-                        b.bounces++; 
+                        b.bounces++; playSound('bounce'); createSparks(b.x, b.y, '#ff0', 5);
                     }
                 });
                 if(b.bounces > 1) destroyed = true;
 
-                // दुश्मन को लगना
+                for(let j=crates.length-1; j>=0; j--){
+                    let c = crates[j];
+                    if(b.x > c.x && b.x < c.x+c.w && b.y > c.y && b.y < c.y+c.h) {
+                        // 🤫 Secret Power: P3's bullets do massive damage to crates
+                        let dmg = (b.ownerId === 3 && p3SecretMode) ? 40 : 20;
+                        c.hp -= dmg; destroyed = true;
+                        if(c.hp <= 0) { crates.splice(j, 1); playSound('explosion'); createSparks(c.x+c.w/2, c.y+c.h/2, '#8b5a2b', 30); }
+                        else createSparks(b.x, b.y, '#8b5a2b', 10);
+                    }
+                }
+
                 tanks.forEach(t => {
-                    if(t.alive && b.ownerId !== t.id && Math.hypot(b.x-t.x, b.y-t.y) < 25*scale) {
-                        t.hp -= 25; 
-                        destroyed = true; 
-                        updateHealthUI(); 
-                        checkDeath(t);
+                    if(t.alive && b.ownerId !== t.id && Math.hypot(b.x-t.x, b.y-t.y) < 22*scale) {
+                        // 🤫 Secret Power: P3's bullets do 40 damage! P1/P2 do normal 20.
+                        let dmg = (b.ownerId === 3 && p3SecretMode) ? 40 : 20;
+                        t.hp -= dmg; destroyed = true; playSound('explosion'); screenShake = 15;
+                        createSparks(t.x, t.y, '#ffaa00', 20); updateHealthUI(); checkDeath(t);
                     }
                 });
 
                 if(destroyed) bullets.splice(i, 1);
             }
+
+            particles.forEach((p, i) => {
+                if(p.type === 'spark') { p.x += p.vx; p.y += p.vy; p.life -= 0.05; }
+                else if(p.type === 'track') p.life -= 0.01;
+                if(p.life <= 0) particles.splice(i, 1);
+            });
+
+            frames++;
         }
 
-        // बाउंड्री बॉक्स टकराव
         function resolveAABB(tank, obj) {
             let r = 20 * scale;
             let testX = Math.max(obj.x, Math.min(tank.x, obj.x+obj.w));
@@ -266,100 +431,192 @@
             let dist = Math.sqrt(distX*distX + distY*distY);
             if (dist < r) {
                 let overlap = r - dist;
-                tank.x += (distX/dist||0) * overlap; 
-                tank.y += (distY/dist||0) * overlap;
+                tank.x += (distX/dist||0) * overlap; tank.y += (distY/dist||0) * overlap;
             }
         }
 
-        // गोली चलाना
         function fireBullet(t) {
-            let speed = 15 * scale;
-            let bx = t.x + Math.cos(t.angle)*(30*scale); 
-            let by = t.y + Math.sin(t.angle)*(30*scale);
+            playSound('shoot');
+            let speed = 20 * scale; // Fast bullets
+            let bx = t.x + Math.cos(t.angle)*(30*scale); let by = t.y + Math.sin(t.angle)*(30*scale);
             
-            bullets.push({ 
-                x: bx, y: by, 
-                vx: Math.cos(t.angle)*speed, 
-                vy: Math.sin(t.angle)*speed, 
-                ownerId: t.id, color: t.color, bounces: 0 
-            });
+            // 🤫 Secret Power: P3 shoots green glowing super bullets
+            let bulletColor = (t.id === 3 && p3SecretMode) ? '#00ff00' : t.color;
             
-            t.cooldown = 20; // फायर रेट
-            t.vx -= Math.cos(t.angle)*3; t.vy -= Math.sin(t.angle)*3; // Recoil
+            bullets.push({ x: bx, y: by, vx: Math.cos(t.angle)*speed, vy: Math.sin(t.angle)*speed, ownerId: t.id, color: bulletColor, bounces: 0 });
+            t.cooldown = t.fireRate;
+            t.vx -= Math.cos(t.angle)*4; t.vy -= Math.sin(t.angle)*4; // Recoil
+            createSparks(bx, by, '#fff', 5);
         }
 
-        // मरना चेक करना
+        function createSparks(x, y, color, count=10) {
+            for(let i=0; i<count; i++){
+                particles.push({ type: 'spark', x, y, vx: (Math.random()-0.5)*20*scale, vy: (Math.random()-0.5)*20*scale, life: 1.0, color, size: Math.random()*4+2 });
+            }
+        }
+
         function checkDeath(tank) {
             if(tank.hp <= 0 && tank.alive) {
                 tank.alive = false; tank.hp = 0;
+                playSound('explosion'); screenShake = 30;
+                createSparks(tank.x, tank.y, tank.color, 50);
                 let aliveTanks = tanks.filter(t => t.alive);
-                if(aliveTanks.length <= 1) {
-                    setTimeout(() => endGame(aliveTanks[0]), 1000);
-                }
+                if(aliveTanks.length <= 1) setTimeout(() => endGame(aliveTanks[0]), 1500);
             }
         }
 
         // ==========================================
-        // 🎨 DRAW ENGINE (SIMPLE 2D)
+        // 🎨 4K VOXEL 3D PROJECTION ENGINE
         // ==========================================
+        function get3DOffset(x, y, z) {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const depth = 0.05; 
+            return {
+                x: x + (x - centerX) * depth * (z / 100),
+                y: y + (y - centerY) * depth * (z / 100)
+            };
+        }
+
         function drawGame() {
-            // बैकग्राउंड
-            ctx.fillStyle = '#1a2618'; 
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#162214'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.save();
+            if (screenShake > 0) { ctx.translate((Math.random()-0.5)*screenShake, (Math.random()-0.5)*screenShake); screenShake--; }
 
             // ग्रिड
-            ctx.strokeStyle = 'rgba(255,255,255,0.05)'; ctx.lineWidth = 1;
-            for(let i=0; i<canvas.width; i+=50*scale) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,canvas.height); ctx.stroke(); }
-            for(let i=0; i<canvas.height; i+=50*scale) { ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(canvas.width,i); ctx.stroke(); }
+            ctx.strokeStyle = 'rgba(0,0,0,0.3)'; ctx.lineWidth = 1;
+            for(let i=0; i<canvas.width; i+=60*scale) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,canvas.height); ctx.stroke(); }
+            for(let i=0; i<canvas.height; i+=60*scale) { ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(canvas.width,i); ctx.stroke(); }
 
-            // दीवारें
-            walls.forEach(w => {
-                ctx.fillStyle = '#555'; ctx.fillRect(w.x, w.y, w.w, w.h);
-                ctx.strokeStyle = '#222'; ctx.lineWidth = 3; ctx.strokeRect(w.x, w.y, w.w, w.h);
+            // सेफ ज़ोन
+            ctx.beginPath(); ctx.arc(safeZone.x, safeZone.y, safeZone.radius, 0, Math.PI*2);
+            ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)'; ctx.lineWidth = 6; ctx.stroke();
+            ctx.fillStyle = 'rgba(255, 0, 0, 0.15)';
+            ctx.beginPath(); ctx.rect(0, 0, canvas.width, canvas.height); ctx.arc(safeZone.x, safeZone.y, safeZone.radius, 0, Math.PI*2, true); ctx.fill();
+
+            particles.forEach(p => {
+                if(p.type === 'track') {
+                    ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.angle);
+                    ctx.fillStyle = `rgba(0,0,0,${p.life * 0.6})`;
+                    ctx.fillRect(-15*scale, -20*scale, 30*scale, 8*scale);
+                    ctx.fillRect(-15*scale, 12*scale, 30*scale, 8*scale);
+                    ctx.restore();
+                }
             });
 
-            // टैंक
-            tanks.forEach(t => {
-                ctx.save(); 
-                ctx.translate(t.x, t.y); ctx.rotate(t.angle);
-                
-                if(!t.alive) {
-                    ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(0,0, 20*scale, 0, Math.PI*2); ctx.fill();
-                    ctx.restore(); return;
+            // 3D Rendering Sorting
+            let renderList = [];
+            walls.forEach(w => renderList.push({type: 'wall', obj: w, sortY: w.y + w.h/2}));
+            crates.forEach(c => renderList.push({type: 'crate', obj: c, sortY: c.y + c.h/2}));
+            tanks.forEach(t => { if(t.alive) renderList.push({type: 'tank', obj: t, sortY: t.y}); });
+            renderList.sort((a, b) => a.sortY - b.sortY);
+
+            // परछाइयां
+            ctx.fillStyle = 'rgba(0,0,0,0.6)';
+            renderList.forEach(item => {
+                if(item.type === 'wall' || item.type === 'crate') {
+                    let o = item.obj; ctx.fillRect(o.x+15, o.y+15, o.w, o.h);
+                } else if(item.type === 'tank') {
+                    ctx.beginPath(); ctx.arc(item.obj.x+12, item.obj.y+12, 20*scale, 0, Math.PI*2); ctx.fill();
                 }
+            });
 
-                // टायर
-                ctx.fillStyle = '#000';
-                ctx.fillRect(-15*scale, -22*scale, 30*scale, 10*scale);
-                ctx.fillRect(-15*scale, 12*scale, 30*scale, 10*scale);
+            // 3D Objects
+            renderList.forEach(item => {
+                let o = item.obj;
+                if(item.type === 'wall') {
+                    ctx.fillStyle = '#222'; ctx.fillRect(o.x, o.y, o.w, o.h);
+                    let p1 = get3DOffset(o.x, o.y, o.z); let p2 = get3DOffset(o.x+o.w, o.y, o.z);
+                    let p3 = get3DOffset(o.x+o.w, o.y+o.h, o.z); let p4 = get3DOffset(o.x, o.y+o.h, o.z);
+                    
+                    ctx.fillStyle = '#1a1a1a';
+                    ctx.beginPath(); ctx.moveTo(o.x, o.y); ctx.lineTo(p1.x, p1.y); ctx.lineTo(p4.x, p4.y); ctx.lineTo(o.x, o.y+o.h); ctx.fill();
+                    ctx.beginPath(); ctx.moveTo(o.x+o.w, o.y); ctx.lineTo(p2.x, p2.y); ctx.lineTo(p3.x, p3.y); ctx.lineTo(o.x+o.w, o.y+o.h); ctx.fill();
+                    ctx.beginPath(); ctx.moveTo(o.x, o.y+o.h); ctx.lineTo(p4.x, p4.y); ctx.lineTo(p3.x, p3.y); ctx.lineTo(o.x+o.w, o.y+o.h); ctx.fill();
 
-                // शरीर (Body)
-                ctx.fillStyle = t.color;
-                ctx.beginPath(); ctx.roundRect(-16*scale, -16*scale, 32*scale, 32*scale, 5); ctx.fill();
-                ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+                    ctx.fillStyle = '#444';
+                    ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.lineTo(p3.x, p3.y); ctx.lineTo(p4.x, p4.y); ctx.fill();
+                    ctx.strokeStyle = '#666'; ctx.lineWidth = 2; ctx.stroke();
 
-                // बैरल (Gun)
-                ctx.fillStyle = '#333'; ctx.fillRect(0, -4*scale, 28*scale, 8*scale);
+                } else if(item.type === 'crate') {
+                    ctx.fillStyle = '#5c3a21'; ctx.fillRect(o.x, o.y, o.w, o.h);
+                    let p1 = get3DOffset(o.x, o.y, o.z); let p2 = get3DOffset(o.x+o.w, o.y, o.z);
+                    let p3 = get3DOffset(o.x+o.w, o.y+o.h, o.z); let p4 = get3DOffset(o.x, o.y+o.h, o.z);
+                    
+                    ctx.fillStyle = '#3e2723';
+                    ctx.beginPath(); ctx.moveTo(o.x, o.y); ctx.lineTo(p1.x, p1.y); ctx.lineTo(p4.x, p4.y); ctx.lineTo(o.x, o.y+o.h); ctx.fill();
+                    ctx.beginPath(); ctx.moveTo(o.x+o.w, o.y); ctx.lineTo(p2.x, p2.y); ctx.lineTo(p3.x, p3.y); ctx.lineTo(o.x+o.w, o.y+o.h); ctx.fill();
+                    ctx.beginPath(); ctx.moveTo(o.x, o.y+o.h); ctx.lineTo(p4.x, p4.y); ctx.lineTo(p3.x, p3.y); ctx.lineTo(o.x+o.w, o.y+o.h); ctx.fill();
 
-                // सिर (Turret)
-                ctx.fillStyle = '#222'; ctx.beginPath(); ctx.arc(0, 0, 10*scale, 0, Math.PI*2); ctx.fill();
+                    ctx.fillStyle = '#8b5a2b';
+                    ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.lineTo(p3.x, p3.y); ctx.lineTo(p4.x, p4.y); ctx.fill();
+                    ctx.strokeStyle = '#a67b5b'; ctx.lineWidth = 2; ctx.stroke();
 
-                ctx.restore();
-                
-                // नाम
-                ctx.fillStyle = '#fff'; ctx.font = `bold ${14*scale}px Arial`; ctx.textAlign = 'center';
-                ctx.fillText(t.name, t.x, t.y - 30*scale);
+                } else if(item.type === 'tank') {
+                    let bodyTop = get3DOffset(o.x, o.y, o.zBody);
+                    ctx.save(); 
+                    ctx.translate(o.x, o.y); ctx.rotate(o.angle);
+                    ctx.fillStyle = '#0a0a0a'; ctx.beginPath(); ctx.roundRect(-18*scale, -18*scale, 36*scale, 36*scale, 5); ctx.fill();
+                    ctx.restore();
+
+                    ctx.save();
+                    ctx.translate(bodyTop.x, bodyTop.y); ctx.rotate(o.angle);
+                    ctx.fillStyle = o.color; ctx.beginPath(); ctx.roundRect(-18*scale, -18*scale, 36*scale, 36*scale, 5); ctx.fill();
+                    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+                    ctx.restore();
+
+                    let turretTop = get3DOffset(o.x, o.y, o.zTurret);
+                    ctx.save();
+                    ctx.translate(turretTop.x, turretTop.y); ctx.rotate(o.angle);
+                    ctx.fillStyle = '#222'; ctx.fillRect(0, -4*scale, 30*scale, 8*scale);
+                    ctx.strokeStyle = '#000'; ctx.strokeRect(0, -4*scale, 30*scale, 8*scale);
+                    ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(0, 0, 12*scale, 0, Math.PI*2); ctx.fill();
+                    
+                    // 🤫 Secret indication (a subtle glow on P3's turret)
+                    if(o.id === 3 && p3SecretMode) {
+                        ctx.strokeStyle = '#00ff00'; ctx.lineWidth = 3; ctx.stroke();
+                    } else {
+                        ctx.strokeStyle = o.color; ctx.lineWidth = 2; ctx.stroke();
+                    }
+                    ctx.restore();
+                }
             });
 
             // गोलियां
             bullets.forEach(b => {
-                ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(b.x, b.y, 4*scale, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = b.color; ctx.globalAlpha = 0.5; ctx.beginPath(); ctx.arc(b.x, b.y, 8*scale, 0, Math.PI*2); ctx.fill(); ctx.globalAlpha = 1.0;
+                let p = get3DOffset(b.x, b.y, 10*scale); 
+                ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(p.x, p.y, 5*scale, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = b.color; ctx.globalAlpha = 0.6; ctx.beginPath(); ctx.arc(p.x, p.y, 14*scale, 0, Math.PI*2); ctx.fill(); ctx.globalAlpha = 1.0;
             });
+
+            // चिंगारियां
+            particles.forEach(p => {
+                if(p.type === 'spark') {
+                    let pos = get3DOffset(p.x, p.y, 10*scale);
+                    ctx.globalAlpha = Math.max(0, p.life); ctx.fillStyle = p.color;
+                    ctx.beginPath(); ctx.arc(pos.x, pos.y, p.size, 0, Math.PI*2); ctx.fill();
+                }
+            });
+            ctx.globalAlpha = 1.0;
+
+            // नाम
+            tanks.forEach(t => {
+                if(t.alive) {
+                    let label = get3DOffset(t.x, t.y, 35*scale);
+                    ctx.fillStyle = '#fff'; ctx.font = `900 ${14*scale}px Arial`; ctx.textAlign = 'center';
+                    // Text Shadow for readability
+                    ctx.shadowColor = '#000'; ctx.shadowBlur = 5; ctx.shadowOffsetX = 2; ctx.shadowOffsetY = 2;
+                    ctx.fillText(t.name, label.x, label.y);
+                    ctx.shadowColor = 'transparent'; // Reset
+                }
+            });
+
+            ctx.restore();
         }
 
         // ==========================================
-        // 🚀 GAME LOOP & BUTTON LOGIC
+        // 🚀 LOOP & UI
         // ==========================================
         function updateHealthUI() {
             document.getElementById('p1Health').style.width = Math.max(0, tanks[0].hp) + '%';
@@ -367,56 +624,28 @@
             document.getElementById('p3Health').style.width = Math.max(0, tanks[2].hp) + '%';
         }
 
-        let animationId;
         function loop() {
-            if (currentState === 'PLAYING') {
-                updatePhysics();
-                drawGame();
-                animationId = requestAnimationFrame(loop);
-            }
-        }
-
-        // 🌟 Start Game Function (बटन से लिंक)
-        function startGame() {
-            console.log("Game Started!"); // कंसोल में चेक करने के लिए
-            document.getElementById('startScreen').classList.add('hidden');
-            document.getElementById('gameOverScreen').classList.add('hidden');
-            document.getElementById('healthBars').classList.remove('hidden');
-            
-            initMap();
-            currentState = 'PLAYING';
-            
-            // अगर पहले से लूप चल रहा हो तो उसे रोककर नया चलाएं (Glitch रोकने के लिए)
-            cancelAnimationFrame(animationId);
-            loop(); 
+            if (currentState === 'PLAYING') updatePhysics();
+            drawGame();
+            if(currentState !== 'STOPPED') requestAnimationFrame(loop);
         }
 
         function endGame(winner) {
             currentState = 'GAMEOVER';
             document.getElementById('healthBars').classList.add('hidden');
+            document.getElementById('zoneWarning').style.display = 'none';
             document.getElementById('gameOverScreen').classList.remove('hidden');
             if(winner) {
-                document.getElementById('winnerText').innerHTML = `${winner.name} WINS! 🏆`;
+                document.getElementById('winnerText').innerHTML = `${winner.name}<br><span style="color:#fff; font-size:40px;">BOOYAH! 🏆</span>`;
                 document.getElementById('winnerText').style.color = winner.color;
             } else {
-                document.getElementById('winnerText').innerHTML = "DRAW! 💀";
-                document.getElementById('winnerText').style.color = "#fff";
+                document.getElementById('winnerText').innerHTML = "DRAW! 💀<br><span style="color:#aaa; font-size:30px;">NO SURVIVORS</span>";
+                document.getElementById('winnerText').style.color = "#ff3333";
             }
-            
-            // पीछे का सीन ब्लर कर दो
-            ctx.fillStyle = 'rgba(0,0,0,0.7)';
-            ctx.fillRect(0,0,canvas.width, canvas.height);
         }
 
-        // बटन पर इवेंट लिस्नर लगाओ
-        document.getElementById('startBtn').addEventListener('click', startGame);
-        document.getElementById('restartBtn').addEventListener('click', startGame);
-
-        // शुरुआत
         resizeCanvas();
-        drawGame(); // पहली बार स्क्रीन ड्रा कर दो ताकि खाली न दिखे
-
+        loop(); 
     </script>
 </body>
 </html>
-
