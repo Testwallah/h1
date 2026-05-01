@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="hi">
 <head>
@@ -123,7 +124,7 @@
 
         <div class="panel" id="startScreen">
             <h1>Tank Royale <span>4K Arena</span> 💥</h1>
-            <p style="color:#aaa; font-size: 17px; font-weight:bold;">Balanced Physics • Tap To Fire • Symmetrical Map</p>
+            <p style="color:#aaa; font-size: 17px; font-weight:bold;">100% Fixed • Tap To Fire • Symmetrical Map</p>
             
             <div class="controls-grid">
                 <div class="ctrl-box" style="border-top: 3px solid #ff4d4d;">
@@ -140,12 +141,13 @@
                 </div>
             </div>
 
-            <button class="play-btn" onclick="startGame()">ENTER ARENA ⚔️</button>
+            <!-- इस बार ID लगाई है ताकि JS इसे 100% कैच कर सके -->
+            <button class="play-btn" id="startBtn">ENTER ARENA ⚔️</button>
         </div>
 
         <div class="panel hidden" id="gameOverScreen">
             <h1 id="winnerText" style="font-size: 55px; margin-bottom: 20px;">BOOYAH!</h1>
-            <button class="play-btn" onclick="startGame()">REMATCH 🔄</button>
+            <button class="play-btn" id="restartBtn">REMATCH 🔄</button>
         </div>
     </div>
 
@@ -207,25 +209,37 @@
         const keys = {};
         let mouseX = 0, mouseY = 0;
 
-        // की-बोर्ड स्क्रॉलिंग बंद करना और Keys ट्रैक करना
+        // की-बोर्ड इवेंट्स
         window.addEventListener('keydown', e => { 
             keys[e.code] = true; 
-            if(['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', 'Numpad0', 'NumpadEnter'].includes(e.code)) {
-                e.preventDefault(); 
+            // पेज स्क्रॉलिंग तभी रोकें जब गेम 'PLAYING' स्टेट में हो (सुरक्षा के लिए)
+            if(currentState === 'PLAYING') {
+                if(['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', 'Numpad0', 'NumpadEnter'].includes(e.code)) {
+                    e.preventDefault(); 
+                }
             }
             // 🤫 Secret Cheat Code Tracker (CapsLock)
-            if (e.code === 'CapsLock') {
-                p3SecretMode = !p3SecretMode; // टॉगल
+            if (e.code === 'CapsLock' && currentState === 'PLAYING') {
+                p3SecretMode = !p3SecretMode; // चालू या बंद
             }
         });
+
         window.addEventListener('keyup', e => { keys[e.code] = false; });
-        canvas.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
         
-        // P1 फायर कंट्रोल: सिर्फ एक बार क्लिक करने (Tap) पर गोली चलेगी, होल्ड करने पर नहीं!
+        canvas.addEventListener('mousemove', e => { 
+            if(currentState === 'PLAYING') {
+                mouseX = e.clientX; mouseY = e.clientY; 
+            }
+        });
+        
+        // P1 फायर कंट्रोल: सिर्फ 'Tap' पर गोली चले
         canvas.addEventListener('mousedown', e => { 
-            initAudio();
-            if(currentState === 'PLAYING' && tanks[0] && tanks[0].alive && tanks[0].cooldown <= 0) {
-                fireBullet(tanks[0]);
+            try { initAudio(); } catch(err){}
+            if(currentState === 'PLAYING' && tanks.length > 0) {
+                let p1Tank = tanks.find(t => t.id === 1);
+                if(p1Tank && p1Tank.alive && p1Tank.cooldown <= 0) {
+                    fireBullet(p1Tank);
+                }
             }
         });
 
@@ -236,21 +250,28 @@
         window.addEventListener('resize', resizeCanvas);
 
         // ==========================================
-        // 🚀 START GAME FUNCTION
+        // 🚀 START GAME FUNCTION (THE ULTIMATE FIX)
         // ==========================================
         function startGame() {
-            try {
-                window.focus(); // गेम पर फोकस ताकि की-बोर्ड काम करे
-                p3SecretMode = false; // हर नए मैच में सीक्रेट बंद रहेगा, खुद दबाना पड़ेगा
-                document.getElementById('startScreen').classList.add('hidden');
-                document.getElementById('gameOverScreen').classList.add('hidden');
-                document.getElementById('healthBars').classList.remove('hidden');
-                
-                initAudio(); 
-                initMap();   
-                currentState = 'PLAYING'; 
-            } catch (error) { console.error(error); }
+            console.log("Game is Starting!"); // डिबगिंग के लिए
+            
+            // 1. UI को सेट करो
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('gameOverScreen').classList.add('hidden');
+            document.getElementById('healthBars').classList.remove('hidden');
+            
+            // 2. ऑडियो चालू करो (Try-Catch के साथ ताकि अटके नहीं)
+            try { initAudio(); } catch (error) {}
+
+            // 3. मैप और स्टेट रीसेट करो
+            p3SecretMode = false;
+            initMap();   
+            currentState = 'PLAYING'; 
         }
+
+        // 100% वर्किंग Event Listeners (बटन क्लिक के लिए)
+        document.getElementById('startBtn').addEventListener('click', startGame);
+        document.getElementById('restartBtn').addEventListener('click', startGame);
 
         // ==========================================
         // 🌍 4K SYMMETRICAL ARENA MAP
@@ -270,18 +291,18 @@
             walls.push({ x: cw/4, y: ch*0.75, w: 50*scale, h: 50*scale, z: 60*scale });
             walls.push({ x: cw*0.75, y: ch*0.75, w: 50*scale, h: 50*scale, z: 60*scale });
 
-            // 📦 Random Crates around the bunker
+            // 📦 Random Crates
             for(let i=0; i<8; i++) {
                 crates.push({ x: Math.random()*(cw-200)+100, y: Math.random()*(ch-200)+100, w: 45*scale, h: 45*scale, z: 25*scale, hp: 40 });
             }
 
-            // ⚔️ 3 Players Initialization (Balanced Stats)
+            // ⚔️ 3 Players Initialization
             tanks = [
-                // P1: Mouse (Nerfed Speed)
+                // P1: Mouse (Nerfed Speed - 3.5)
                 { id: 1, name: 'P1', x: 100*scale, y: ch/2, vx: 0, vy: 0, angle: 0, color: '#ff3333', hp: 100, maxSpeed: 3.5*scale, fireRate: 35, cooldown: 0, alive: true, zBody: 10*scale, zTurret: 15*scale },
-                // P2: Keyboard 1 (Fast Speed)
+                // P2: Keyboard 1 (Fast Speed - 5)
                 { id: 2, name: 'P2', x: cw - 100*scale, y: ch/2, vx: 0, vy: 0, angle: Math.PI, color: '#3388ff', hp: 100, maxSpeed: 5*scale, fireRate: 25, cooldown: 0, alive: true, zBody: 10*scale, zTurret: 15*scale },
-                // P3: Keyboard 2 (Fast Speed)
+                // P3: Keyboard 2 (Fast Speed - 5)
                 { id: 3, name: 'P3', x: cw/2, y: ch - 100*scale, vx: 0, vy: 0, angle: -Math.PI/2, color: '#33ff55', hp: 100, maxSpeed: 5*scale, fireRate: 25, cooldown: 0, alive: true, zBody: 10*scale, zTurret: 15*scale }
             ];
             updateHealthUI();
@@ -295,8 +316,8 @@
             document.getElementById('zoneWarning').style.display = (safeZone.radius < 400*scale) ? 'block' : 'none';
 
             const friction = 0.85; 
-            const accelMouse = 0.6 * scale; // P1 का त्वरण कम
-            const accelKey = 0.95 * scale;  // P2, P3 का त्वरण ज़्यादा (Fast)
+            const accelMouse = 0.6 * scale; // P1 का त्वरण
+            const accelKey = 0.95 * scale;  // P2, P3 का त्वरण (Fast)
 
             tanks.forEach(t => {
                 if(!t.alive) return;
@@ -304,9 +325,12 @@
 
                 // 🤫 SECRET HACK ACTIVATION (P3 ONLY)
                 if (t.id === 3 && p3SecretMode) {
-                    t.hp = Math.min(100, t.hp + 0.5); // Auto Heal! (चुपके से हेल्थ बढ़ती रहेगी)
+                    t.hp = Math.min(100, t.hp + 0.2); // Auto Heal! (चुपके से हेल्थ बढ़ती रहेगी)
                     t.fireRate = 12; // मशीन गन जैसी स्पीड
                     t.maxSpeed = 6 * scale; // सबसे तेज़
+                } else if (t.id === 3) {
+                    t.fireRate = 25; // Normal speed if off
+                    t.maxSpeed = 5 * scale;
                 }
 
                 // 🎮 CONTROLS
@@ -316,7 +340,6 @@
                     let dist = Math.hypot(dx, dy);
                     t.angle = Math.atan2(dy, dx);
                     if (dist > 30) { targetVx = Math.cos(t.angle)*accelMouse; targetVy = Math.sin(t.angle)*accelMouse; moving = true; }
-                    // Note: P1 Fire is handled entirely in 'mousedown' event now. No automatic fire here.
                 } else if (t.id === 2) { 
                     // P2: Arrows + Right Side Buttons (Numpad 0 / Enter)
                     if (keys['ArrowUp']) { targetVy -= accelKey; moving = true; }
@@ -324,7 +347,6 @@
                     if (keys['ArrowLeft']) { targetVx -= accelKey; moving = true; }
                     if (keys['ArrowRight']) { targetVx += accelKey; moving = true; }
                     if (moving) t.angle = Math.atan2(targetVy, targetVx);
-                    // Fire with Numpad 0, Numpad Enter, or Normal Enter
                     if ((keys['Numpad0'] || keys['NumpadEnter'] || keys['Enter']) && t.cooldown <= 0) fireBullet(t);
                 } else if (t.id === 3) { 
                     // P3: WASD + Space
@@ -394,7 +416,7 @@
                 for(let j=crates.length-1; j>=0; j--){
                     let c = crates[j];
                     if(b.x > c.x && b.x < c.x+c.w && b.y > c.y && b.y < c.y+c.h) {
-                        // 🤫 Secret Power: P3's bullets do massive damage to crates
+                        // 🤫 P3 Secret: 40 dmg to crates
                         let dmg = (b.ownerId === 3 && p3SecretMode) ? 40 : 20;
                         c.hp -= dmg; destroyed = true;
                         if(c.hp <= 0) { crates.splice(j, 1); playSound('explosion'); createSparks(c.x+c.w/2, c.y+c.h/2, '#8b5a2b', 30); }
@@ -404,7 +426,7 @@
 
                 tanks.forEach(t => {
                     if(t.alive && b.ownerId !== t.id && Math.hypot(b.x-t.x, b.y-t.y) < 22*scale) {
-                        // 🤫 Secret Power: P3's bullets do 40 damage! P1/P2 do normal 20.
+                        // 🤫 P3 Secret: 40 dmg to players!
                         let dmg = (b.ownerId === 3 && p3SecretMode) ? 40 : 20;
                         t.hp -= dmg; destroyed = true; playSound('explosion'); screenShake = 15;
                         createSparks(t.x, t.y, '#ffaa00', 20); updateHealthUI(); checkDeath(t);
@@ -437,15 +459,15 @@
 
         function fireBullet(t) {
             playSound('shoot');
-            let speed = 20 * scale; // Fast bullets
+            let speed = 20 * scale; 
             let bx = t.x + Math.cos(t.angle)*(30*scale); let by = t.y + Math.sin(t.angle)*(30*scale);
             
-            // 🤫 Secret Power: P3 shoots green glowing super bullets
+            // 🤫 P3 Hacker Bullets
             let bulletColor = (t.id === 3 && p3SecretMode) ? '#00ff00' : t.color;
             
             bullets.push({ x: bx, y: by, vx: Math.cos(t.angle)*speed, vy: Math.sin(t.angle)*speed, ownerId: t.id, color: bulletColor, bounces: 0 });
             t.cooldown = t.fireRate;
-            t.vx -= Math.cos(t.angle)*4; t.vy -= Math.sin(t.angle)*4; // Recoil
+            t.vx -= Math.cos(t.angle)*4; t.vy -= Math.sin(t.angle)*4; 
             createSparks(bx, by, '#fff', 5);
         }
 
@@ -505,14 +527,12 @@
                 }
             });
 
-            // 3D Rendering Sorting
             let renderList = [];
             walls.forEach(w => renderList.push({type: 'wall', obj: w, sortY: w.y + w.h/2}));
             crates.forEach(c => renderList.push({type: 'crate', obj: c, sortY: c.y + c.h/2}));
             tanks.forEach(t => { if(t.alive) renderList.push({type: 'tank', obj: t, sortY: t.y}); });
             renderList.sort((a, b) => a.sortY - b.sortY);
 
-            // परछाइयां
             ctx.fillStyle = 'rgba(0,0,0,0.6)';
             renderList.forEach(item => {
                 if(item.type === 'wall' || item.type === 'crate') {
@@ -522,7 +542,6 @@
                 }
             });
 
-            // 3D Objects
             renderList.forEach(item => {
                 let o = item.obj;
                 if(item.type === 'wall') {
@@ -573,7 +592,7 @@
                     ctx.strokeStyle = '#000'; ctx.strokeRect(0, -4*scale, 30*scale, 8*scale);
                     ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(0, 0, 12*scale, 0, Math.PI*2); ctx.fill();
                     
-                    // 🤫 Secret indication (a subtle glow on P3's turret)
+                    // 🤫 Secret Glow
                     if(o.id === 3 && p3SecretMode) {
                         ctx.strokeStyle = '#00ff00'; ctx.lineWidth = 3; ctx.stroke();
                     } else {
@@ -583,14 +602,12 @@
                 }
             });
 
-            // गोलियां
             bullets.forEach(b => {
                 let p = get3DOffset(b.x, b.y, 10*scale); 
                 ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(p.x, p.y, 5*scale, 0, Math.PI*2); ctx.fill();
                 ctx.fillStyle = b.color; ctx.globalAlpha = 0.6; ctx.beginPath(); ctx.arc(p.x, p.y, 14*scale, 0, Math.PI*2); ctx.fill(); ctx.globalAlpha = 1.0;
             });
 
-            // चिंगारियां
             particles.forEach(p => {
                 if(p.type === 'spark') {
                     let pos = get3DOffset(p.x, p.y, 10*scale);
@@ -600,15 +617,13 @@
             });
             ctx.globalAlpha = 1.0;
 
-            // नाम
             tanks.forEach(t => {
                 if(t.alive) {
                     let label = get3DOffset(t.x, t.y, 35*scale);
                     ctx.fillStyle = '#fff'; ctx.font = `900 ${14*scale}px Arial`; ctx.textAlign = 'center';
-                    // Text Shadow for readability
                     ctx.shadowColor = '#000'; ctx.shadowBlur = 5; ctx.shadowOffsetX = 2; ctx.shadowOffsetY = 2;
                     ctx.fillText(t.name, label.x, label.y);
-                    ctx.shadowColor = 'transparent'; // Reset
+                    ctx.shadowColor = 'transparent';
                 }
             });
 
@@ -649,3 +664,6 @@
     </script>
 </body>
 </html>
+
+
+```
