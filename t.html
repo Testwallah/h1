@@ -1,0 +1,768 @@
+```html
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>तीर और ढाल 🏹🛡️ - Advanced 2 Player</title>
+    <style>
+        /* CSS: एकदम झक्कास और प्रीमियम स्टाइलिंग */
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+        
+        body, html {
+            width: 100%; height: 100%; overflow: hidden;
+            background: #0f2027; /* Fallback */
+            background: linear-gradient(to right, #203A43, #0f2027);
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            touch-action: none; /* मोबाइल स्वाइप रोकना */
+        }
+
+        #gameCanvas {
+            display: block; width: 100%; height: 100%;
+        }
+
+        /* UI कंटेनर जो कैनवास के ऊपर दिखेगा */
+        .ui-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 10;
+        }
+
+        /* टॉप स्कोर और टाइमर बार */
+        .top-bar {
+            position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 40px; align-items: center;
+            background: rgba(0, 0, 0, 0.5); padding: 10px 30px;
+            border-radius: 30px; border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        .score-box { text-align: center; }
+        .score-box span { display: block; font-size: 14px; font-weight: bold; color: #aaa; text-transform: uppercase; }
+        .score-box .points { font-size: 36px; font-weight: 900; }
+        #p1ScoreText { color: #ff4d4d; text-shadow: 0 0 10px rgba(255,77,77,0.5); }
+        #p2ScoreText { color: #4dffff; text-shadow: 0 0 10px rgba(77,255,255,0.5); }
+        
+        #timerText { font-size: 40px; font-weight: 900; color: #ffeb3b; text-shadow: 0 0 15px rgba(255,235,59,0.5); width: 60px; text-align: center; }
+
+        /* मोबाइल कंट्रोल्स (Player 1 के लिए) */
+        .mobile-controls {
+            position: absolute; bottom: 20px; left: 20px;
+            display: flex; gap: 20px; pointer-events: auto;
+        }
+        .btn-col { display: flex; flex-direction: column; gap: 10px; }
+        .ctrl-btn {
+            width: 70px; height: 70px; border-radius: 50%;
+            background: rgba(255, 77, 77, 0.2); border: 2px solid rgba(255, 77, 77, 0.6);
+            color: white; font-size: 24px; font-weight: bold;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 0 15px rgba(255,77,77,0.3);
+            transition: transform 0.1s;
+        }
+        .ctrl-btn:active { transform: scale(0.9); background: rgba(255, 77, 77, 0.5); }
+        #shootBtn { width: 90px; height: 90px; margin-top: auto; border-radius: 20px; font-size: 30px; }
+
+        /* मोबाइल इंस्ट्रक्शन (Player 2 के लिए) */
+        .p2-instruction {
+            position: absolute; bottom: 30px; right: 30px;
+            color: rgba(77,255,255,0.5); font-size: 20px; font-weight: bold; text-align: right;
+            pointer-events: none;
+        }
+
+        /* मेनू और गेम ओवर स्क्रीन (Glassmorphism) */
+        .panel {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(10, 20, 30, 0.75); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            padding: 50px; border-radius: 25px; border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255,255,255,0.05);
+            text-align: center; pointer-events: auto; width: 85%; max-width: 500px;
+        }
+
+        .panel h1 { font-size: 45px; color: #fff; margin-bottom: 10px; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .panel h1 span { color: #ffeb3b; }
+        .panel p { font-size: 18px; color: #ccc; margin-bottom: 30px; line-height: 1.5; }
+        
+        .result-text { font-size: 35px; font-weight: 900; margin-bottom: 20px; }
+
+        .play-btn {
+            background: linear-gradient(135deg, #ff4d4d 0%, #ff9933 100%);
+            border: none; padding: 15px 50px; font-size: 24px; font-weight: 900;
+            border-radius: 50px; color: #fff; cursor: pointer;
+            box-shadow: 0 8px 20px rgba(255,77,77,0.4); transition: all 0.2s; text-transform: uppercase;
+        }
+        .play-btn:hover { transform: scale(1.05); box-shadow: 0 12px 25px rgba(255,77,77,0.6); }
+        .play-btn:active { transform: scale(0.95); }
+
+        .hidden { display: none !important; }
+
+        /* डेस्कटॉप पर मोबाइल कंट्रोल्स छुपाएं (JS से मैनेज करेंगे पर बेस CSS ये है) */
+        @media (hover: hover) and (pointer: fine) {
+            .mobile-controls { opacity: 0.3; } /* डेस्कटॉप पर हल्का दिखेगा ताकि पता चले */
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- UI लेयर -->
+    <div class="ui-layer">
+        
+        <!-- टॉप स्कोर बार -->
+        <div class="top-bar hidden" id="topBar">
+            <div class="score-box">
+                <span>Player 1 (🏹)</span>
+                <div class="points" id="p1ScoreText">0</div>
+            </div>
+            <div id="timerText">60</div>
+            <div class="score-box">
+                <span>Player 2 (🛡️)</span>
+                <div class="points" id="p2ScoreText">0</div>
+            </div>
+        </div>
+
+        <!-- मोबाइल कंट्रोल्स (Player 1) -->
+        <div class="mobile-controls hidden" id="mobileControls">
+            <div class="btn-col">
+                <div class="ctrl-btn" id="upBtn">⬆️</div>
+                <div class="ctrl-btn" id="downBtn">⬇️</div>
+            </div>
+            <div class="ctrl-btn" id="shootBtn">🏹</div>
+        </div>
+
+        <!-- P2 टच इंस्ट्रक्शन -->
+        <div class="p2-instruction hidden" id="p2TouchText">
+            Drag here to move Shield 🛡️
+        </div>
+
+        <!-- स्टार्ट स्क्रीन -->
+        <div class="panel" id="startScreen">
+            <h1>तीर <span>और</span> ढाल</h1>
+            <p><b>Player 1 (Left):</b> W/S to Move, Hold SPACE to Shoot<br>
+               <b>Player 2 (Right):</b> Use Mouse to Move Shield</p>
+            <button class="play-btn" id="startBtn">BATTLE START ⚔️</button>
+        </div>
+
+        <!-- गेम ओवर स्क्रीन -->
+        <div class="panel hidden" id="gameOverScreen">
+            <div class="result-text" id="winnerText">Player 1 WINS!</div>
+            <p id="finalScoreDesc">P1: 10 | P2: 5</p>
+            <button class="play-btn" id="restartBtn">REMATCH 🔄</button>
+        </div>
+
+    </div>
+
+    <script>
+        /* =========================================
+           साउंड इंजन (Web Audio API - Fast & Powerful) 🎵
+           ========================================= */
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new AudioContext();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function playSound(type) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+
+            if (type === 'draw') {
+                // धनुष खींचने की आवाज़
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(100, now);
+                osc.frequency.linearRampToValueAtTime(300, now + 0.5);
+                gainNode.gain.setValueAtTime(0, now);
+                gainNode.gain.linearRampToValueAtTime(0.1, now + 0.5);
+                osc.start(now);
+                osc.stop(now + 0.5);
+            } 
+            else if (type === 'shoot') {
+                // तीर छोड़ने की आवाज़ (सन्ननन्न)
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(600, now);
+                osc.frequency.exponentialRampToValueAtTime(100, now + 0.2);
+                gainNode.gain.setValueAtTime(0.3, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                osc.start(now);
+                osc.stop(now + 0.2);
+            } 
+            else if (type === 'block') {
+                // ढाल से टकराने की आवाज़ (Clank!)
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(800, now);
+                osc.frequency.exponentialRampToValueAtTime(200, now + 0.1);
+                gainNode.gain.setValueAtTime(0.5, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                osc.start(now);
+                osc.stop(now + 0.2);
+            }
+            else if (type === 'hit') {
+                // दीवार पर तीर लगने की आवाज़ (Thud!)
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.exponentialRampToValueAtTime(40, now + 0.3);
+                gainNode.gain.setValueAtTime(0.6, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            }
+        }
+
+        /* =========================================
+           गेम सेटअप और कैनवास 🎮
+           ========================================= */
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // UI Elements
+        const ui = {
+            start: document.getElementById('startScreen'),
+            gameOver: document.getElementById('gameOverScreen'),
+            topBar: document.getElementById('topBar'),
+            controls: document.getElementById('mobileControls'),
+            p2Hint: document.getElementById('p2TouchText'),
+            p1Score: document.getElementById('p1ScoreText'),
+            p2Score: document.getElementById('p2ScoreText'),
+            timer: document.getElementById('timerText'),
+            winner: document.getElementById('winnerText'),
+            finalDesc: document.getElementById('finalScoreDesc')
+        };
+
+        // गेम वेरिएबल्स
+        let currentState = 'START'; // START, PLAYING, GAMEOVER
+        let animationId;
+        let p1Score = 0;
+        let p2Score = 0;
+        let timeLeft = 60;
+        let lastTime = 0;
+        let screenShake = 0; // हिट होने पर स्क्रीन हिलाने के लिए
+
+        // रिस्पॉन्सिव स्केलिंग
+        let scale = 1;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            scale = canvas.height / 800; // बेस हाइट 800 मान कर
+            
+            if(shield.x === 0) shield.x = canvas.width - 150; // ढाल की डिफ़ॉल्ट पोज़िशन
+            if(archer.x === 0) archer.x = 100;
+        }
+        window.addEventListener('resize', resizeCanvas);
+
+        /* =========================================
+           गेम ऑब्जेक्ट्स (तीरंदाज़, ढाल, तीर, पार्टिकल्स)
+           ========================================= */
+        
+        // 🏹 Player 1: तीरंदाज़ (Archer)
+        const archer = {
+            x: 100, y: 0,
+            radius: 30, // बॉडी का साइज़
+            speed: 8,
+            charging: false,
+            chargeLevel: 0, // 0 से 100 तक
+            moveUp: false,
+            moveDown: false,
+
+            update() {
+                // मूवमेंट
+                if (this.moveUp) this.y -= this.speed * scale;
+                if (this.moveDown) this.y += this.speed * scale;
+
+                // स्क्रीन से बाहर न जाए
+                this.y = Math.max(80 * scale, Math.min(canvas.height - 80 * scale, this.y));
+
+                // तीर चार्ज करना
+                if (this.charging) {
+                    if (this.chargeLevel === 0) playSound('draw'); // आवाज़ शुरू
+                    this.chargeLevel += 2; // चार्ज स्पीड
+                    if (this.chargeLevel > 100) this.chargeLevel = 100;
+                }
+            },
+
+            fire() {
+                if (!this.charging) return;
+                
+                // कम से कम थोड़ा चार्ज होना चाहिए
+                let power = Math.max(20, this.chargeLevel); 
+                
+                // नया तीर बनाओ
+                arrows.push(new Arrow(this.x + 40, this.y, power));
+                playSound('shoot');
+                
+                // तीरंदाज़ को हल्का सा पीछे धक्का (Recoil)
+                this.x -= (power * 0.1); 
+                setTimeout(() => this.x = 100, 100); // वापस आ जाए
+
+                this.charging = false;
+                this.chargeLevel = 0;
+            },
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                
+                // प्लेयर का शरीर (Body)
+                ctx.beginPath();
+                ctx.arc(0, 0, this.radius * scale, 0, Math.PI * 2);
+                ctx.fillStyle = '#ff4d4d'; // P1 कलर
+                ctx.fill();
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#fff';
+                ctx.stroke();
+
+                // धनुष (Bow) - चार्ज के हिसाब से मुड़ेगा
+                ctx.beginPath();
+                let bowCurve = 40 - (this.chargeLevel * 0.2); // खींचने पर धनुष सीधा होता है
+                ctx.moveTo(10, -50 * scale);
+                ctx.quadraticCurveTo(bowCurve * scale, 0, 10, 50 * scale);
+                ctx.lineWidth = 6 * scale;
+                ctx.strokeStyle = '#8B4513'; // लकड़ी का रंग
+                ctx.stroke();
+
+                // धनुष की डोरी (String)
+                ctx.beginPath();
+                let pullBack = (this.chargeLevel * 0.4) * scale;
+                ctx.moveTo(10, -50 * scale);
+                ctx.lineTo(-pullBack, 0);
+                ctx.lineTo(10, 50 * scale);
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#ddd';
+                ctx.stroke();
+
+                // अगर चार्ज कर रहा है तो तीर भी दिखाओ
+                if (this.charging) {
+                    ctx.beginPath();
+                    ctx.moveTo(-pullBack, 0);
+                    ctx.lineTo(40 * scale, 0); // तीर की लंबाई
+                    ctx.lineWidth = 4 * scale;
+                    ctx.strokeStyle = '#fff';
+                    ctx.stroke();
+                    // तीर की नोक
+                    ctx.beginPath();
+                    ctx.moveTo(40 * scale, 0);
+                    ctx.lineTo(30 * scale, -5 * scale);
+                    ctx.lineTo(30 * scale, 5 * scale);
+                    ctx.fillStyle = 'silver';
+                    ctx.fill();
+                }
+
+                // चार्ज बार (Power Meter)
+                ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                ctx.fillRect(-30 * scale, -70 * scale, 60 * scale, 8 * scale);
+                ctx.fillStyle = `rgb(${255}, ${255 - this.chargeLevel*2}, 0)`; // पीला से लाल
+                ctx.fillRect(-30 * scale, -70 * scale, (this.chargeLevel/100) * 60 * scale, 8 * scale);
+
+                ctx.restore();
+            }
+        };
+
+        // 🛡️ Player 2: ढाल (Shield)
+        const shield = {
+            x: 0, y: 0,
+            radius: 60, // ढाल का साइज़
+            glow: 0, // टकराने पर चमकने के लिए
+
+            update() {
+                // टकराने पर ग्लो कम करना
+                if (this.glow > 0) this.glow -= 5;
+            },
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+
+                // ग्लो इफ़ेक्ट
+                if (this.glow > 0) {
+                    ctx.beginPath();
+                    ctx.arc(0, 0, (this.radius + this.glow) * scale, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(77, 255, 255, ${this.glow/100})`;
+                    ctx.fill();
+                }
+
+                // ढाल का बाहरी रिंग (Energy Field)
+                ctx.beginPath();
+                ctx.arc(0, 0, this.radius * scale, 0, Math.PI * 2);
+                ctx.lineWidth = 5 * scale;
+                ctx.strokeStyle = '#4dffff';
+                ctx.stroke();
+
+                // अंदर का हिस्सा (ग्रेडीयंट)
+                let grad = ctx.createRadialGradient(0,0,0, 0,0, this.radius * scale);
+                grad.addColorStop(0, 'rgba(77, 255, 255, 0.6)');
+                grad.addColorStop(1, 'rgba(10, 30, 40, 0.8)');
+                ctx.fillStyle = grad;
+                ctx.fill();
+                
+                // ढाल का हैंडल (बीच में)
+                ctx.beginPath();
+                ctx.arc(0, 0, 15 * scale, 0, Math.PI * 2);
+                ctx.fillStyle = '#fff';
+                ctx.fill();
+
+                ctx.restore();
+            }
+        };
+
+        // ➳ तीर (Arrows) क्लास
+        let arrows = [];
+        class Arrow {
+            constructor(x, y, power) {
+                this.x = x;
+                this.y = y;
+                // पावर के हिसाब से स्पीड (Physics)
+                this.vx = (power * 0.4 + 10) * scale; 
+                this.vy = (Math.random() * -2) * scale; // हल्का सा ऊपर की तरफ
+                this.gravity = 0.15 * scale; // असली ग्रेविटी 🌍
+                this.length = 50 * scale;
+                this.active = true;
+            }
+
+            update() {
+                if (!this.active) return;
+                
+                this.vy += this.gravity; // तीर नीचे गिरेगा पैराबोला (Parabola) में
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // ढाल (Shield) से टकराव चेक करना (Collision Detection)
+                // तीर की नोक और ढाल के सेंटर की दूरी चेक करेंगे
+                let distToShield = Math.hypot(this.x - shield.x, this.y - shield.y);
+                if (distToShield < shield.radius * scale) {
+                    this.block(); // ढाल ने रोक लिया!
+                    return;
+                }
+
+                // स्क्रीन के बाहर (दाईं तरफ दीवार पर) हिट
+                if (this.x > canvas.width) {
+                    this.hitTarget();
+                }
+                
+                // अगर ज़मीन पर गिर जाए (नीचे)
+                if(this.y > canvas.height + 100) {
+                    this.active = false;
+                }
+            }
+
+            draw() {
+                if (!this.active) return;
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                
+                // उड़ने की दिशा में घूमना (Angle of rotation)
+                let angle = Math.atan2(this.vy, this.vx);
+                ctx.rotate(angle);
+
+                // तीर ड्रा करना
+                ctx.beginPath();
+                ctx.moveTo(-this.length, 0);
+                ctx.lineTo(0, 0);
+                ctx.lineWidth = 4 * scale;
+                ctx.strokeStyle = '#fff';
+                ctx.stroke();
+                
+                // नोक (Arrowhead)
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(-10 * scale, -6 * scale);
+                ctx.lineTo(-10 * scale, 6 * scale);
+                ctx.fillStyle = '#ff4d4d'; // खतरनाक लाल नोक
+                ctx.fill();
+                
+                // पीछे के पंख (Fletching)
+                ctx.beginPath();
+                ctx.moveTo(-this.length, 0);
+                ctx.lineTo(-this.length - 8 * scale, -5 * scale);
+                ctx.moveTo(-this.length, 0);
+                ctx.lineTo(-this.length - 8 * scale, 5 * scale);
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.restore();
+            }
+
+            block() {
+                this.active = false;
+                playSound('block');
+                shield.glow = 50; // ढाल चमकेगी
+                p2Score++; // ढाल वाले को पॉइंट! 🛡️
+                updateScores();
+                
+                // नीले पार्टिकल्स (Sparks)
+                for(let i=0; i<15; i++) {
+                    particles.push(new Particle(this.x, this.y, '#4dffff'));
+                }
+            }
+
+            hitTarget() {
+                this.active = false;
+                playSound('hit');
+                p1Score++; // तीरंदाज़ को पॉइंट! 🏹
+                updateScores();
+                screenShake = 15; // स्क्रीन हिलाओ! 💥
+                
+                // लाल/नारंगी पार्टिकल्स
+                for(let i=0; i<20; i++) {
+                    particles.push(new Particle(canvas.width, this.y, '#ff4d4d'));
+                }
+            }
+        }
+
+        // ✨ पार्टिकल्स (विज़ुअल इफ़ेक्ट के लिए)
+        let particles = [];
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x; this.y = y;
+                this.color = color;
+                this.size = (Math.random() * 5 + 2) * scale;
+                this.vx = (Math.random() * 10 - 5) * scale;
+                this.vy = (Math.random() * 10 - 5) * scale;
+                this.life = 1.0;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= 0.05; // गायब होना
+                this.size *= 0.9;
+            }
+            draw() {
+                if (this.life <= 0) return;
+                ctx.globalAlpha = this.life;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1.0;
+            }
+        }
+
+        /* =========================================
+           गेम लूप और रेंडरिंग 🔄
+           ========================================= */
+        
+        function updateScores() {
+            ui.p1Score.innerText = p1Score;
+            ui.p2Score.innerText = p2Score;
+            
+            // हल्का सा एनीमेशन
+            ui.p1Score.style.transform = 'scale(1.5)';
+            ui.p2Score.style.transform = 'scale(1.5)';
+            setTimeout(() => {
+                ui.p1Score.style.transform = 'scale(1)';
+                ui.p2Score.style.transform = 'scale(1)';
+            }, 100);
+        }
+
+        function drawBackground() {
+            // डायनामिक ग्रेडिएंट बैकग्राउंड
+            let bgGrad = ctx.createLinearGradient(0, 0, canvas.width, 0);
+            bgGrad.addColorStop(0, '#1a0b12'); // P1 साइड डार्क लाल
+            bgGrad.addColorStop(1, '#0b1a22'); // P2 साइड डार्क नीला
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // सेंटर लाइन
+            ctx.setLineDash([15, 15]);
+            ctx.beginPath();
+            ctx.moveTo(canvas.width / 2, 0);
+            ctx.lineTo(canvas.width / 2, canvas.height);
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+            ctx.stroke();
+            ctx.setLineDash([]); // रीसेट
+            
+            // P2 का बेस (दीवार)
+            ctx.fillStyle = 'rgba(77,255,255,0.1)';
+            ctx.fillRect(canvas.width - 20, 0, 20, canvas.height);
+        }
+
+        function loop(timestamp) {
+            // टाइमर लॉजिक
+            if (currentState === 'PLAYING') {
+                if (!lastTime) lastTime = timestamp;
+                let dt = timestamp - lastTime;
+                if (dt >= 1000) {
+                    timeLeft--;
+                    ui.timer.innerText = timeLeft;
+                    lastTime = timestamp;
+                    
+                    if (timeLeft <= 0) {
+                        endGame();
+                    }
+                }
+            }
+
+            // स्क्रीन शेक इफ़ेक्ट (Screen Shake) 💥
+            ctx.save();
+            if (screenShake > 0) {
+                let dx = (Math.random() - 0.5) * screenShake;
+                let dy = (Math.random() - 0.5) * screenShake;
+                ctx.translate(dx, dy);
+                screenShake -= 1; // धीरे-धीरे कम होगा
+            }
+
+            // सब ड्रा करो
+            drawBackground();
+
+            if (currentState === 'PLAYING') {
+                archer.update();
+                shield.update();
+                
+                // तीर अपडेट
+                for(let i = arrows.length - 1; i >= 0; i--) {
+                    arrows[i].update();
+                    arrows[i].draw();
+                    if(!arrows[i].active) arrows.splice(i, 1);
+                }
+
+                // पार्टिकल्स
+                for(let i = particles.length - 1; i >= 0; i--) {
+                    particles[i].update();
+                    particles[i].draw();
+                    if(particles[i].life <= 0) particles.splice(i, 1);
+                }
+            } else if (currentState === 'GAMEOVER') {
+                // गेम ओवर पर भी पार्टिकल्स दिखाते रहो
+                for(let i = particles.length - 1; i >= 0; i--) {
+                    particles[i].update();
+                    particles[i].draw();
+                    if(particles[i].life <= 0) particles.splice(i, 1);
+                }
+            }
+
+            archer.draw();
+            shield.draw();
+
+            ctx.restore(); // शेक इफ़ेक्ट खत्म
+
+            if(currentState !== 'STOPPED') {
+                animationId = requestAnimationFrame(loop);
+            }
+        }
+
+        /* =========================================
+           गेम कंट्रोलर (Start, End) 🚀
+           ========================================= */
+        function startGame() {
+            initAudio();
+            currentState = 'PLAYING';
+            p1Score = 0; p2Score = 0;
+            timeLeft = 60; lastTime = 0;
+            arrows = []; particles = [];
+            
+            archer.y = canvas.height / 2;
+            shield.y = canvas.height / 2;
+            shield.x = canvas.width - 150 * scale;
+
+            updateScores();
+            ui.timer.innerText = timeLeft;
+
+            ui.start.classList.add('hidden');
+            ui.gameOver.classList.add('hidden');
+            ui.topBar.classList.remove('hidden');
+            ui.controls.classList.remove('hidden');
+            ui.p2Hint.classList.remove('hidden');
+        }
+
+        function endGame() {
+            currentState = 'GAMEOVER';
+            ui.topBar.classList.add('hidden');
+            ui.controls.classList.add('hidden');
+            ui.p2Hint.classList.add('hidden');
+            ui.gameOver.classList.remove('hidden');
+
+            // कौन जीता? 🏆
+            if (p1Score > p2Score) {
+                ui.winner.innerText = "🏹 Player 1 WINS!";
+                ui.winner.style.color = "#ff4d4d";
+            } else if (p2Score > p1Score) {
+                ui.winner.innerText = "🛡️ Player 2 WINS!";
+                ui.winner.style.color = "#4dffff";
+            } else {
+                ui.winner.innerText = "🤝 IT'S A TIE!";
+                ui.winner.style.color = "#ffeb3b";
+            }
+            ui.finalDesc.innerText = `Archer: ${p1Score} | Shield: ${p2Score}`;
+        }
+
+        /* =========================================
+           इनपुट्स (Keyboard, Mouse, Touch) ⌨️🖱️📱
+           ========================================= */
+
+        // --- Player 1: Keyboard ---
+        window.addEventListener('keydown', (e) => {
+            if (currentState !== 'PLAYING') return;
+            if (e.code === 'KeyW' || e.code === 'ArrowUp') archer.moveUp = true;
+            if (e.code === 'KeyS' || e.code === 'ArrowDown') archer.moveDown = true;
+            if (e.code === 'Space') archer.charging = true;
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (currentState !== 'PLAYING') return;
+            if (e.code === 'KeyW' || e.code === 'ArrowUp') archer.moveUp = false;
+            if (e.code === 'KeyS' || e.code === 'ArrowDown') archer.moveDown = false;
+            if (e.code === 'Space') {
+                archer.fire();
+            }
+        });
+
+        // --- Player 2: Mouse (Desktop) ---
+        canvas.addEventListener('mousemove', (e) => {
+            if (currentState !== 'PLAYING') return;
+            // माउस अगर स्क्रीन के आधे से ज़्यादा दाईं तरफ है, तभी ढाल को उसके साथ चलाएं
+            if (e.clientX > canvas.width / 2) {
+                shield.x = e.clientX;
+                shield.y = e.clientY;
+            }
+        });
+
+        // --- Mobile Virtual Buttons (Player 1) ---
+        const btnUp = document.getElementById('upBtn');
+        const btnDown = document.getElementById('downBtn');
+        const btnShoot = document.getElementById('shootBtn');
+
+        // Touch start
+        btnUp.addEventListener('touchstart', (e) => { e.preventDefault(); archer.moveUp = true; }, {passive: false});
+        btnDown.addEventListener('touchstart', (e) => { e.preventDefault(); archer.moveDown = true; }, {passive: false});
+        btnShoot.addEventListener('touchstart', (e) => { e.preventDefault(); initAudio(); archer.charging = true; }, {passive: false});
+        // Touch end
+        btnUp.addEventListener('touchend', (e) => { e.preventDefault(); archer.moveUp = false; });
+        btnDown.addEventListener('touchend', (e) => { e.preventDefault(); archer.moveDown = false; });
+        btnShoot.addEventListener('touchend', (e) => { e.preventDefault(); archer.fire(); });
+
+        // --- Multi-Touch for Player 2 (Right side of screen) ---
+        canvas.addEventListener('touchmove', (e) => {
+            if (currentState !== 'PLAYING') return;
+            e.preventDefault(); // पेज स्क्रॉल रोको
+            
+            // लूप चलाकर चेक करो कि कौन सी ऊँगली दाईं (Right) तरफ है
+            for (let i = 0; i < e.touches.length; i++) {
+                let touch = e.touches[i];
+                if (touch.clientX > canvas.width / 2) {
+                    shield.x = touch.clientX;
+                    shield.y = touch.clientY;
+                }
+            }
+        }, {passive: false});
+
+        // UI Buttons
+        document.getElementById('startBtn').addEventListener('click', startGame);
+        document.getElementById('restartBtn').addEventListener('click', startGame);
+
+        // शुरुआत
+        resizeCanvas();
+        archer.y = canvas.height / 2;
+        loop(); // गेम इंजन चालू
+
+    </script>
+</body>
+</html>
+
+
+```
