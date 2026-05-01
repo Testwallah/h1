@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Flappy Pro 🇮🇳 - Advanced</title>
+    <style>
+        /* CSS: गेम की एकदम झक्कास स्टाइलिंग */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #87CEEB 0%, #a1d1e8 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            touch-action: none; /* मोबाइल पर फालतू ज़ूम या स्वाइप रोके */
+        }
+
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* UI लेयर जो कैनवास के ऊपर रहेगी */
+        .ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+
+        /* लाइव स्कोर */
+        #liveScore {
+            position: absolute;
+            top: 8%;
+            font-size: 60px;
+            font-weight: 900;
+            color: white;
+            text-shadow: 4px 4px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
+            transition: transform 0.1s ease-out;
+            z-index: 15;
+        }
+
+        /* साउंड टॉगल बटन */
+        #soundToggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(5px);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            pointer-events: auto;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #soundToggle:hover { transform: scale(1.1); background: rgba(255, 255, 255, 0.5); }
+        #soundToggle:active { transform: scale(0.9); }
+
+        /* शीशे जैसा (Glassmorphism) पैनल */
+        .panel {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 40px 50px;
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), inset 0 0 20px rgba(255,255,255,0.2);
+            text-align: center;
+            pointer-events: auto;
+            max-width: 90%;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .panel h1 {
+            font-size: 40px;
+            margin-bottom: 15px;
+            color: #ff9933;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            letter-spacing: 1px;
+        }
+
+        .panel p {
+            font-size: 20px;
+            margin-bottom: 25px;
+            color: #138808;
+            font-weight: 800;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .score-board {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .score-board div {
+            font-size: 26px;
+            font-weight: 900;
+            margin: 8px 0;
+            color: #fff;
+            text-shadow: 2px 2px 3px #000;
+        }
+
+        /* प्ले बटन - तिरंगा थीम */
+        button.play-btn {
+            background: linear-gradient(135deg, #ff9933 0%, #ffffff 50%, #138808 100%);
+            border: 2px solid white;
+            padding: 15px 45px;
+            font-size: 24px;
+            font-weight: 900;
+            border-radius: 50px;
+            color: #111;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            transition: all 0.15s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        button.play-btn:hover {
+            transform: scale(1.08) translateY(-3px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.5);
+        }
+
+        button.play-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .hidden { display: none !important; }
+
+        .instructions {
+            position: absolute;
+            bottom: 30px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            text-shadow: 2px 2px 3px #000;
+            text-align: center;
+            background: rgba(0,0,0,0.3);
+            padding: 10px 20px;
+            border-radius: 20px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <div class="ui-layer">
+        <!-- साउंड बटन -->
+        <button id="soundToggle" title="Sound On/Off">🔊</button>
+
+        <!-- खेलते समय का स्कोर -->
+        <div id="liveScore" class="hidden">0</div>
+
+        <!-- स्टार्ट स्क्रीन -->
+        <div id="startScreen" class="panel">
+            <h1>Flappy Pro 🇮🇳</h1>
+            <p>Advanced Physics & Speed ⚡</p>
+            <button id="startBtn" class="play-btn">START</button>
+        </div>
+
+        <!-- गेम ओवर स्क्रीन -->
+        <div id="gameOverScreen" class="panel hidden">
+            <h1 style="color: #ff4444; text-shadow: 2px 2px 0px #fff;">Game Over! 💥</h1>
+            <div class="score-board">
+                <div>Score: <span id="finalScore" style="color:#ff9933">0</span></div>
+                <div>Best: <span id="bestScore" style="color:#138808">0</span></div>
+            </div>
+            <button id="restartBtn" class="play-btn">REPLAY</button>
+        </div>
+
+        <div id="instructionText" class="instructions">
+            Press <b>SPACE</b> or <b>TAP</b> to Fly 🚀
+        </div>
+    </div>
+
+    <script>
+        /* =========================================
+           साउंड इंजन (Web Audio API - Fast & No Load Time) 🎵
+           ========================================= */
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+        let isSoundOn = true;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioContext();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playSound(type) {
+            if (!isSoundOn || !audioCtx) return;
+
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'jump') {
+                // जंप की आवाज़ (थोड़ी ऊँची होती हुई)
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.exponentialRampToValueAtTime(600, now + 0.1);
+                gainNode.gain.setValueAtTime(0.3, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            } 
+            else if (type === 'score') {
+                // स्कोर बढ़ने पर टिंग की आवाज़
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(800, now);
+                osc.frequency.setValueAtTime(1200, now + 0.05); // सुर बदलना
+                gainNode.gain.setValueAtTime(0.1, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                osc.start(now);
+                osc.stop(now + 0.15);
+            } 
+            else if (type === 'hit') {
+                // टकराने पर भारी आवाज़ (Crash)
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.exponentialRampToValueAtTime(40, now + 0.3);
+                gainNode.gain.setValueAtTime(0.4, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            }
+        }
+
+        // साउंड टॉगल बटन का लॉजिक
+        const soundToggleBtn = document.getElementById('soundToggle');
+        soundToggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // कैनवास पर क्लिक न जाए
+            isSoundOn = !isSoundOn;
+            soundToggleBtn.innerText = isSoundOn ? '🔊' : '🔇';
+            initAudio(); // परमिशन लेने के लिए
+        });
+
+
+        /* =========================================
+           गेम का लॉजिक और कैनवास सेटअप 🎮
+           ========================================= */
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // UI
+        const startScreen = document.getElementById('startScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const liveScoreUI = document.getElementById('liveScore');
+        const finalScoreUI = document.getElementById('finalScore');
+        const bestScoreUI = document.getElementById('bestScore');
+        const instructionText = document.getElementById('instructionText');
+
+        // यूज़र की इमेज लोड करना
+        const playerImage = new Image();
+        playerImage.crossOrigin = "anonymous"; // CORS एरर से बचने के लिए
+        playerImage.src = 'https://i.ibb.co/8LqB2vrh/1777603586219.png';
+
+        // गेम वेरिएबल्स
+        let frames = 0;
+        let score = 0;
+        let bestScore = localStorage.getItem('flappyProBest') || 0;
+        let currentState = 'START'; // START, PLAYING, GAMEOVER
+        let animationId;
+
+        // प्रो फिजिक्स (Pro Physics Variables)
+        let baseScale = 1;
+        let gravity = 0.35;
+        let jumpForce = 7.0;
+        let maxFallSpeed = 10; 
+        let gameSpeed = 3.5;
+
+        // फुल स्क्रीन रिस्पॉन्सिव
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            // स्क्रीन की ऊंचाई के हिसाब से फिजिक्स सेट करना
+            baseScale = canvas.height / 700; 
+            gravity = 0.4 * baseScale;
+            jumpForce = 7.5 * baseScale;
+            maxFallSpeed = 12 * baseScale;
+            
+            gameSpeed = 3.5 * (canvas.width / 800); 
+            if(gameSpeed < 3) gameSpeed = 3;
+            if(gameSpeed > 6) gameSpeed = 6;
+
+            if(currentState === 'START' && bird) {
+                bird.y = canvas.height / 2;
+                bird.x = canvas.width / 3;
+                bird.width = 50 * baseScale;
+                bird.height = 50 * baseScale;
+            }
+        }
+        window.addEventListener('resize', resizeCanvas);
+
+        // पार्टिकल इफ़ेक्ट (रॉकेट जैसा धुआँ) 💨
+        let particles = [];
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 6 + 3;
+                this.speedX = (Math.random() * 2) - 3; // पीछे की तरफ
+                this.speedY = (Math.random() * 2) - 1;
+                this.life = 1.0;
+            }
+            update() {
+                this.x += this.speedX - (gameSpeed * 0.5);
+                this.y += this.speedY;
+                this.life -= 0.04;
+                this.size *= 0.95; // छोटे होते जाएँ
+            }
+            draw() {
+                ctx.globalAlpha = Math.max(0, this.life);
+                ctx.fillStyle = '#ffffff'; // सफ़ेद धुआँ
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1.0;
+            }
+        }
+
+        /* =========================================
+           🦅 चिड़िया (The Bird)
+           ========================================= */
+        const bird = {
+            x: 0, y: 0,
+            width: 45, height: 45, // इमेज का साइज़
+            velocity: 0,
+            rotation: 0,
+            
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                
+                // एकदम असली फील वाली रोटेशन
+                ctx.rotate(this.rotation);
+                
+                // यूज़र की इमेज ड्रा करना
+                // इमेज को बीच में (center) से ड्रा करने के लिए -width/2, -height/2
+                if (playerImage.complete) {
+                    ctx.drawImage(playerImage, -this.width/2, -this.height/2, this.width, this.height);
+                } else {
+                    // अगर इमेज लोड नहीं हुई तो बैकअप सर्कल
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.width/2, 0, Math.PI * 2);
+                    ctx.fillStyle = '#ff9933';
+                    ctx.fill();
+                }
+                
+                ctx.restore();
+            },
+            
+            update() {
+                // टाइट और स्मूथ ग्रेविटी
+                this.velocity += gravity;
+                // गिरने की मैक्सिमम स्पीड लिमिट (ताकि अचानक गायब न हो जाए)
+                if (this.velocity > maxFallSpeed) this.velocity = maxFallSpeed;
+                
+                this.y += this.velocity;
+                
+                // रोटेशन लॉजिक (ऊपर जाते वक़्त मुँह ऊपर, गिरते वक़्त नीचे)
+                if (this.velocity < 0) {
+                    // जंप कर रहा है
+                    this.rotation = Math.max(-Math.PI / 4, this.rotation - 0.15);
+                } else {
+                    // गिर रहा है
+                    this.rotation = Math.min(Math.PI / 2, this.rotation + 0.05 + (this.velocity * 0.005));
+                }
+
+                // जमीन से टकराना
+                if (this.y + (this.height/2) >= canvas.height - 25) { // 25px ज़मीन है
+                    this.y = canvas.height - 25 - (this.height/2);
+                    if (currentState !== 'GAMEOVER') {
+                        playSound('hit');
+                        gameOver();
+                    }
+                }
+                
+                // आसमान (छत) से बाहर न जाए
+                if (this.y - (this.height/2) <= 0) {
+                    this.y = this.height/2;
+                    this.velocity = 0;
+                }
+            },
+            
+            jump() {
+                this.velocity = -jumpForce;
+                this.rotation = -Math.PI / 4; // तुरंत मुँह ऊपर
+                playSound('jump'); // जंप साउंड
+                
+                // रॉकेट बूस्ट वाले पार्टिकल्स 🚀
+                for(let i=0; i<6; i++){
+                    particles.push(new Particle(this.x - 10, this.y + 10));
+                }
+            }
+        };
+
+        /* =========================================
+           🟩 पाइप्स (Pipes / Obstacles)
+           ========================================= */
+        const pipes = {
+            items: [],
+            width: 70,
+            gap: 170, // एडवांस फिजिक्स के लिए थोड़ा गैप परफेक्ट रखा है
+            
+            draw() {
+                for (let i = 0; i < this.items.length; i++) {
+                    let p = this.items[i];
+                    
+                    // प्रो-लेवल 3D पाइप डिज़ाइन
+                    let pipeGrad = ctx.createLinearGradient(p.x, 0, p.x + this.width, 0);
+                    pipeGrad.addColorStop(0, "#226B33"); // डार्क हरा
+                    pipeGrad.addColorStop(0.2, "#4CAF50"); // ब्राइट हरा
+                    pipeGrad.addColorStop(0.8, "#4CAF50");
+                    pipeGrad.addColorStop(1, "#1A5227"); // डार्क
+                    
+                    ctx.fillStyle = pipeGrad;
+                    ctx.strokeStyle = "#113318";
+                    ctx.lineWidth = 3;
+
+                    // टॉप पाइप
+                    ctx.fillRect(p.x, 0, this.width, p.top);
+                    ctx.strokeRect(p.x, 0, this.width, p.top);
+                    // टॉप पाइप का बॉर्डर
+                    ctx.fillRect(p.x - 4, p.top - 25, this.width + 8, 25);
+                    ctx.strokeRect(p.x - 4, p.top - 25, this.width + 8, 25);
+                    
+                    // बॉटम पाइप
+                    ctx.fillRect(p.x, p.bottom, this.width, canvas.height - p.bottom - 25);
+                    ctx.strokeRect(p.x, p.bottom, this.width, canvas.height - p.bottom - 25);
+                    // बॉटम पाइप का बॉर्डर
+                    ctx.fillRect(p.x - 4, p.bottom, this.width + 8, 25);
+                    ctx.strokeRect(p.x - 4, p.bottom, this.width + 8, 25);
+                }
+            },
+            
+            update() {
+                this.width = 70 * baseScale;
+                this.gap = 180 * baseScale;
+
+                // नए पाइप स्पॉन (Spawn) करना - स्पीड के हिसाब से दूरी
+                let spawnRate = Math.floor(120 * (3.5/gameSpeed));
+                if (frames % spawnRate === 0) {
+                    let minTop = 60 * baseScale;
+                    let maxTop = canvas.height - 25 - this.gap - (60 * baseScale);
+                    let topHeight = Math.floor(Math.random() * (maxTop - minTop + 1) + minTop);
+                    
+                    this.items.push({
+                        x: canvas.width,
+                        top: topHeight,
+                        bottom: topHeight + this.gap,
+                        passed: false
+                    });
+                }
+                
+                for (let i = 0; i < this.items.length; i++) {
+                    let p = this.items[i];
+                    p.x -= gameSpeed;
+                    
+                    // कोलिजन (Hitbox) चेक - चिड़िया को स्क्वायर मानकर (थोड़ी छूट के साथ)
+                    let hitboxRelax = 8; // कोलिजन थोड़ा माफ़ करने के लिए (Fair Play)
+                    let bLeft = bird.x - (bird.width/2) + hitboxRelax;
+                    let bRight = bird.x + (bird.width/2) - hitboxRelax;
+                    let bTop = bird.y - (bird.height/2) + hitboxRelax;
+                    let bBottom = bird.y + (bird.height/2) - hitboxRelax;
+                    
+                    if (bRight > p.x && bLeft < p.x + this.width) {
+                        if (bTop < p.top || bBottom > p.bottom) {
+                            if (currentState !== 'GAMEOVER') {
+                                playSound('hit');
+                                gameOver();
+                            }
+                        }
+                    }
+                    
+                    // स्कोर अपडेट
+                    if (p.x + this.width < bird.x && !p.passed) {
+                        score++;
+                        p.passed = true;
+                        playSound('score'); // 🔔 स्कोर साउंड
+                        liveScoreUI.innerText = score;
+                        liveScoreUI.style.transform = 'scale(1.6)';
+                        setTimeout(() => liveScoreUI.style.transform = 'scale(1)', 150);
+                    }
+                    
+                    // स्क्रीन से बाहर जाने पर हटाना
+                    if (p.x + this.width < -10) {
+                        this.items.shift();
+                        i--;
+                    }
+                }
+            },
+            reset() { this.items = []; }
+        };
+
+        // ☁️ बैकग्राउंड इफ़ेक्ट (Scroll)
+        let bgOffset = 0;
+        function drawBackground() {
+            // आसमान
+            ctx.fillStyle = '#87CEEB';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // पीछे के पहाड़/शहर (Parallax Effect)
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            bgOffset += gameSpeed * 0.2;
+            if (bgOffset > 400) bgOffset = 0;
+            
+            for(let i=-1; i<Math.ceil(canvas.width/400)+1; i++){
+                let xPos = (i * 400) - bgOffset;
+                ctx.beginPath();
+                ctx.moveTo(xPos, canvas.height - 25);
+                ctx.lineTo(xPos + 150, canvas.height - 200);
+                ctx.lineTo(xPos + 300, canvas.height - 25);
+                ctx.fill();
+            }
+        }
+
+        /* =========================================
+           मेन गेम लूप (Main Loop) 🔄
+           ========================================= */
+        function loop() {
+            drawBackground();
+
+            if (currentState === 'PLAYING') {
+                pipes.update();
+                pipes.draw();
+                bird.update();
+                
+                // पार्टिकल्स अपडेट 
+                for(let i=0; i<particles.length; i++){
+                    particles[i].update();
+                    particles[i].draw();
+                    if(particles[i].life <= 0){
+                        particles.splice(i, 1); i--;
+                    }
+                }
+                frames++;
+            } else if (currentState === 'GAMEOVER') {
+                pipes.draw();
+                // गेम ओवर एनीमेशन: चिड़िया मुँह के बल गिरेगी
+                if(bird.y + (bird.height/2) < canvas.height - 25){
+                    bird.velocity += gravity * 1.5;
+                    bird.y += bird.velocity;
+                    bird.rotation += 0.2; // तेज़ी से घूमना
+                }
+            }
+
+            bird.draw();
+
+            // मूविंग ज़मीन (Ground) 🌍
+            let groundOffset = (frames * gameSpeed) % 40;
+            ctx.fillStyle = '#DEB887'; 
+            ctx.fillRect(0, canvas.height - 25, canvas.width, 25);
+            // ज़मीन पर पट्टियाँ (Speed illusion)
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(0, canvas.height - 25, canvas.width, 4);
+            ctx.fillStyle = 'rgba(0,0,0,0.1)';
+            for(let i=0; i<canvas.width + 40; i+=40) {
+                ctx.beginPath();
+                ctx.moveTo(i - groundOffset, canvas.height - 21);
+                ctx.lineTo(i - groundOffset + 15, canvas.height);
+                ctx.lineTo(i - groundOffset + 25, canvas.height);
+                ctx.lineTo(i - groundOffset + 10, canvas.height - 21);
+                ctx.fill();
+            }
+
+            if (currentState !== 'STOPPED') {
+                animationId = requestAnimationFrame(loop);
+            }
+        }
+
+        /* =========================================
+           गेम कंट्रोल्स और स्टेट्स 🚀
+           ========================================= */
+        function startGame() {
+            initAudio(); // ब्राउज़र को साउंड परमिशन देना
+            currentState = 'PLAYING';
+            pipes.reset();
+            particles = [];
+            
+            bird.y = canvas.height / 2;
+            bird.x = canvas.width / 3;
+            bird.velocity = 0;
+            bird.rotation = 0;
+            bird.width = 50 * baseScale;
+            bird.height = 50 * baseScale;
+            
+            score = 0;
+            frames = 0;
+            
+            liveScoreUI.innerText = '0';
+            liveScoreUI.classList.remove('hidden');
+            startScreen.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+            instructionText.classList.add('hidden');
+            
+            bird.jump();
+        }
+
+        function gameOver() {
+            currentState = 'GAMEOVER';
+            liveScoreUI.classList.add('hidden');
+            gameOverScreen.classList.remove('hidden');
+            
+            finalScoreUI.innerText = score;
+            if (score > bestScore) {
+                bestScore = score;
+                localStorage.setItem('flappyProBest', bestScore);
+            }
+            bestScoreUI.innerText = bestScore;
+        }
+
+        function handleJumpInput(e) {
+            // UI बटन पर क्लिक होने पर इग्नोर करें
+            if(e.target.tagName === 'BUTTON' || e.target.id === 'soundToggle') return;
+            
+            initAudio(); // अगर यूज़र सीधा स्क्रीन पर क्लिक करे
+            if (currentState === 'PLAYING') {
+                bird.jump();
+            }
+        }
+
+        // Mouse & Touch
+        window.addEventListener('mousedown', handleJumpInput);
+        window.addEventListener('touchstart', (e) => {
+            // मोबाइल पर डबल-टैप ज़ूम रोकने के लिए preventDefault
+            if(e.target.tagName !== 'BUTTON') {
+                e.preventDefault(); 
+                handleJumpInput(e);
+            }
+        }, {passive: false});
+
+        // Keyboard Spacebar
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' || e.code === 'ArrowUp') {
+                e.preventDefault(); 
+                initAudio();
+                if (currentState === 'START' || currentState === 'GAMEOVER') {
+                    // थोड़ा डिले ताकि गेम ओवर होते ही गलती से स्टार्ट न हो जाए
+                    if(document.activeElement.tagName !== 'BUTTON') {
+                         startGame();
+                    }
+                } else if (currentState === 'PLAYING') {
+                    bird.jump();
+                }
+            }
+        });
+
+        // बटन्स
+        document.getElementById('startBtn').addEventListener('click', startGame);
+        document.getElementById('restartBtn').addEventListener('click', startGame);
+
+        // शुरुआत
+        resizeCanvas();
+        playerImage.onload = () => {
+            // इमेज लोड होने पर एक बार री-ड्रा कर दें ताकि पहली फ्रेम में आ जाए
+            bird.draw(); 
+        };
+        loop(); // गेम इंजन चालू
+
+    </script>
+</body>
+</html>
+
