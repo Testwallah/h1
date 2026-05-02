@@ -1,669 +1,689 @@
 ```html
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tank Royale 3D 💥 - 4K Masterpiece</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Tank War - The Maze</title>
     <style>
-        /* CSS: 4K प्रीमियम UI डिज़ाइन */
-        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; outline: none; }
-        
-        body, html {
-            width: 100%; height: 100%; overflow: hidden; /* पेज स्क्रॉलिंग एकदम बंद */
-            background-color: #162214; /* डार्क 4K ग्रास बैकग्राउंड */
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-            touch-action: none;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
         }
-
+        body {
+            background-color: #0a0a0a;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden; 
+        }
         #gameCanvas {
-            display: block; width: 100%; height: 100%;
-            cursor: crosshair; /* P1 के लिए कर्सर */
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #0f0f1a 100%);
         }
-
-        /* 🎛️ UI लेयर */
-        .ui-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 10;
+        #ui-layer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; /* Let clicks pass through to canvas */
         }
-
-        /* 3 Players के हेल्थ बार्स */
-        .health-container {
-            position: absolute; top: 20px; width: 100%;
-            display: flex; justify-content: space-around; padding: 0 40px; gap: 20px;
+        .menu-container {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(10, 10, 20, 0.95);
+            padding: 40px;
+            border-radius: 15px;
+            border: 2px solid #00f3ff;
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.3), inset 0 0 20px rgba(0, 243, 255, 0.1);
+            text-align: center;
+            pointer-events: auto;
+            z-index: 100;
         }
-        
-        .player-info {
-            background: rgba(10, 15, 10, 0.85); padding: 12px 25px;
-            border-radius: 12px; border: 1px solid rgba(255,255,255,0.15);
-            backdrop-filter: blur(20px); box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            display: flex; flex-direction: column; gap: 8px; width: 30%; max-width: 350px;
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            color: #fff;
+            text-shadow: 0 0 10px #00f3ff, 0 0 20px #00f3ff;
+            letter-spacing: 2px;
         }
-        
-        .player-info.p1 { border-top: 4px solid #ff3333; }
-        .player-info.p2 { border-top: 4px solid #0088ff; }
-        .player-info.p3 { border-top: 4px solid #00ff55; }
-
-        .name-tag { font-weight: 900; color: white; font-size: 16px; text-transform: uppercase; letter-spacing: 1.5px;}
-        .p1-name { color: #ff4d4d; }
-        .p2-name { color: #4da6ff; }
-        .p3-name { color: #4dff88; }
-
-        .health-bar-bg {
-            width: 100%; height: 22px; background: #1a1a1a;
-            border-radius: 12px; overflow: hidden; border: 1px solid #444;
-            box-shadow: inset 0 3px 8px rgba(0,0,0,0.9);
+        .btn {
+            background: transparent;
+            color: #00f3ff;
+            border: 2px solid #00f3ff;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            margin: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        
-        .health-fill { height: 100%; transition: width 0.2s ease-out; box-shadow: inset 0 2px 5px rgba(255,255,255,0.4); }
-        #p1Health { background: linear-gradient(90deg, #aa0000, #ff3333); width: 100%; }
-        #p2Health { background: linear-gradient(90deg, #0033aa, #0088ff); width: 100%; }
-        #p3Health { background: linear-gradient(90deg, #008822, #00ff55); width: 100%; }
-
-        /* ⚠️ ज़ोन वार्निंग */
-        #zoneWarning {
-            position: absolute; top: 110px; left: 50%; transform: translateX(-50%);
-            color: #ff1111; font-size: 30px; font-weight: 900; letter-spacing: 3px;
-            text-shadow: 0 0 25px #ff0000; animation: pulseZone 0.8s infinite;
-            display: none; background: rgba(0,0,0,0.7); padding: 8px 30px; border-radius: 10px;
-            border: 1px solid #ff0000;
+        .btn:hover {
+            background: #00f3ff;
+            color: #000;
+            box-shadow: 0 0 20px #00f3ff;
+            transform: scale(1.05);
         }
-        @keyframes pulseZone { 0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); } 50% { opacity: 0.5; transform: translateX(-50%) scale(1.05); } }
-
-        /* 🖥️ मेनू स्क्रीन */
-        .panel {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: linear-gradient(135deg, rgba(25, 30, 25, 0.95), rgba(10, 15, 10, 0.98));
-            padding: 40px; border-radius: 20px; border: 2px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 40px 80px rgba(0, 0, 0, 1);
-            text-align: center; pointer-events: auto; width: 95%; max-width: 700px;
+        .instructions {
+            margin-top: 30px;
+            text-align: left;
+            background: rgba(0,0,0,0.5);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #ff0055;
         }
-
-        .panel h1 { font-size: 48px; color: #fff; margin-bottom: 5px; text-shadow: 0 5px 20px rgba(0,0,0,0.9); }
-        .panel h1 span { color: #ffaa00; }
-        
-        .controls-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin: 30px 0; }
-        .ctrl-box { background: rgba(0,0,0,0.6); padding: 20px 15px; border-radius: 15px; border: 1px solid #333; box-shadow: inset 0 0 20px rgba(0,0,0,0.8);}
-        .ctrl-box h3 { font-size: 19px; margin-bottom: 12px; text-shadow: 2px 2px 5px #000; }
-        .ctrl-box p { font-size: 14px; color: #ccc; line-height: 1.6;}
-
-        /* प्ले बटन */
-        .play-btn {
-            background: linear-gradient(135deg, #ff8800 0%, #ff2200 100%);
-            border: 2px solid #ffaa00; padding: 18px 60px; font-size: 26px; font-weight: 900;
-            border-radius: 50px; color: #fff; cursor: pointer;
-            box-shadow: 0 10px 40px rgba(255,50,0,0.6); transition: transform 0.1s; text-transform: uppercase;
+        .instructions p {
+            margin: 8px 0;
+            font-size: 0.95rem;
+            color: #ddd;
         }
-        .play-btn:active { transform: scale(0.95); }
-
-        .hidden { display: none !important; }
+        .instructions span {
+            color: #ffcc00;
+            font-weight: bold;
+        }
+        #gameOverBox {
+            display: none;
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 50px;
+            border-radius: 15px;
+            border: 2px solid #ffcc00;
+            text-align: center;
+            pointer-events: auto;
+            z-index: 200;
+            box-shadow: 0 0 50px rgba(255, 204, 0, 0.4);
+        }
+        #winnerText {
+            font-size: 3rem;
+            margin-bottom: 30px;
+            text-shadow: 0 0 15px currentColor;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
-    <!-- गेम कैनवास -->
-    <canvas id="gameCanvas"></canvas>
-
-    <div class="ui-layer">
-        <div id="zoneWarning">⚠️ SAFE ZONE SHRINKING! ⚠️</div>
-
-        <div class="health-container hidden" id="healthBars">
-            <div class="player-info p1">
-                <div class="name-tag p1-name">🔴 P1 (Mouse)</div>
-                <div class="health-bar-bg"><div class="health-fill" id="p1Health"></div></div>
-            </div>
-            <div class="player-info p2">
-                <div class="name-tag p2-name">🔵 P2 (Arrows)</div>
-                <div class="health-bar-bg"><div class="health-fill" id="p2Health"></div></div>
-            </div>
-            <div class="player-info p3">
-                <div class="name-tag p3-name">🟢 P3 (WASD)</div>
-                <div class="health-bar-bg"><div class="health-fill" id="p3Health"></div></div>
-            </div>
-        </div>
-
-        <div class="panel" id="startScreen">
-            <h1>Tank Royale <span>4K Arena</span> 💥</h1>
-            <p style="color:#aaa; font-size: 17px; font-weight:bold;">100% Fixed • Tap To Fire • Symmetrical Map</p>
+    <div id="ui-layer">
+        <div id="mainMenu" class="menu-container">
+            <h1>TANK MAZE</h1>
+            <button class="btn" onclick="startGame(2)">Battle - 2 Players</button>
+            <button class="btn" onclick="startGame(3)">Battle - 3 Players</button>
             
-            <div class="controls-grid">
-                <div class="ctrl-box" style="border-top: 3px solid #ff4d4d;">
-                    <h3 style="color: #ff4d4d;">P1 (RED)</h3>
-                    <p><b>Move:</b> Follows Mouse<br><b>Fire:</b> Left Click (Tap)</p>
-                </div>
-                <div class="ctrl-box" style="border-top: 3px solid #4da6ff;">
-                    <h3 style="color: #4da6ff;">P2 (BLUE)</h3>
-                    <p><b>Move:</b> Arrows ⬆️⬇️⬅️➡️<br><b>Fire:</b> Numpad 0 / Enter</p>
-                </div>
-                <div class="ctrl-box" style="border-top: 3px solid #4dff88;">
-                    <h3 style="color: #4dff88;">P3 (GREEN)</h3>
-                    <p><b>Move:</b> W, A, S, D<br><b>Fire:</b> SPACEBAR</p>
-                </div>
+            <div class="instructions">
+                <p><span>🔵 Player 1 (Mouse):</span> Mouse to Move/Aim | Left Click to Fire</p>
+                <p><span>🔴 Player 2 (Arrows):</span> Arrow Keys to Move | Numpad Enter to Fire</p>
+                <p><span>🟢 Player 3 (WASD):</span> W,A,S,D to Move | Space to Fire</p>
+                <p style="margin-top: 15px; color: #00f3ff; font-size: 0.85rem;">* Bullets bounce off walls once!</p>
             </div>
-
-            <!-- इस बार ID लगाई है ताकि JS इसे 100% कैच कर सके -->
-            <button class="play-btn" id="startBtn">ENTER ARENA ⚔️</button>
         </div>
 
-        <div class="panel hidden" id="gameOverScreen">
-            <h1 id="winnerText" style="font-size: 55px; margin-bottom: 20px;">BOOYAH!</h1>
-            <button class="play-btn" id="restartBtn">REMATCH 🔄</button>
+        <div id="gameOverBox">
+            <div id="winnerText">Player Wins!</div>
+            <button class="btn" onclick="location.reload()" style="border-color:#ffcc00; color:#ffcc00;">Play Again</button>
         </div>
     </div>
 
+    <canvas id="gameCanvas"></canvas>
+
     <script>
-        // ==========================================
-        // 🎵 CRASH-PROOF AUDIO ENGINE
-        // ==========================================
-        let audioCtx;
-        function initAudio() {
-            try {
-                if (!audioCtx) {
-                    const AudioContext = window.AudioContext || window.webkitAudioContext;
-                    if(AudioContext) audioCtx = new AudioContext();
-                }
-                if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-            } catch(e) {}
-        }
-
-        function playSound(type) {
-            try {
-                if (!audioCtx) return;
-                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-                osc.connect(gain); gain.connect(audioCtx.destination);
-                const now = audioCtx.currentTime;
-
-                if (type === 'shoot') {
-                    osc.type = 'square'; osc.frequency.setValueAtTime(250, now);
-                    osc.frequency.exponentialRampToValueAtTime(10, now + 0.2);
-                    gain.gain.setValueAtTime(0.4, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-                    osc.start(now); osc.stop(now + 0.2);
-                } else if (type === 'explosion') {
-                    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(100, now);
-                    osc.frequency.exponentialRampToValueAtTime(10, now + 0.8);
-                    gain.gain.setValueAtTime(0.8, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
-                    osc.start(now); osc.stop(now + 0.8);
-                } else if (type === 'bounce') {
-                    osc.type = 'triangle'; osc.frequency.setValueAtTime(800, now);
-                    osc.frequency.exponentialRampToValueAtTime(200, now + 0.1);
-                    gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-                    osc.start(now); osc.stop(now + 0.1);
-                }
-            } catch(e) {} 
-        }
-
-        // ==========================================
-        // 🎮 GAME SETUP & INPUTS
-        // ==========================================
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
+
+        // Game resolution (internal)
+        const GAME_WIDTH = 1600;
+        const GAME_HEIGHT = 900;
         
-        let currentState = 'START';
-        let scale = 1; let screenShake = 0; let frames = 0;
-        let tanks = [], bullets = [], particles = [], crates = [], walls = [];
-        let safeZone = { x: 0, y: 0, radius: 2000 };
-
-        // 🤫 Secret Power Flag
-        let p3SecretMode = false;
-
-        const keys = {};
-        let mouseX = 0, mouseY = 0;
-
-        // की-बोर्ड इवेंट्स
-        window.addEventListener('keydown', e => { 
-            keys[e.code] = true; 
-            // पेज स्क्रॉलिंग तभी रोकें जब गेम 'PLAYING' स्टेट में हो (सुरक्षा के लिए)
-            if(currentState === 'PLAYING') {
-                if(['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', 'Numpad0', 'NumpadEnter'].includes(e.code)) {
-                    e.preventDefault(); 
-                }
-            }
-            // 🤫 Secret Cheat Code Tracker (CapsLock)
-            if (e.code === 'CapsLock' && currentState === 'PLAYING') {
-                p3SecretMode = !p3SecretMode; // चालू या बंद
-            }
-        });
-
-        window.addEventListener('keyup', e => { keys[e.code] = false; });
-        
-        canvas.addEventListener('mousemove', e => { 
-            if(currentState === 'PLAYING') {
-                mouseX = e.clientX; mouseY = e.clientY; 
-            }
-        });
-        
-        // P1 फायर कंट्रोल: सिर्फ 'Tap' पर गोली चले
-        canvas.addEventListener('mousedown', e => { 
-            try { initAudio(); } catch(err){}
-            if(currentState === 'PLAYING' && tanks.length > 0) {
-                let p1Tank = tanks.find(t => t.id === 1);
-                if(p1Tank && p1Tank.alive && p1Tank.cooldown <= 0) {
-                    fireBullet(p1Tank);
-                }
-            }
-        });
+        let scaleX = 1;
+        let scaleY = 1;
 
         function resizeCanvas() {
-            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-            scale = Math.min(canvas.width, canvas.height) / 900;
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            scaleX = canvas.width / GAME_WIDTH;
+            scaleY = canvas.height / GAME_HEIGHT;
         }
         window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
 
-        // ==========================================
-        // 🚀 START GAME FUNCTION (THE ULTIMATE FIX)
-        // ==========================================
-        function startGame() {
-            console.log("Game is Starting!"); // डिबगिंग के लिए
-            
-            // 1. UI को सेट करो
-            document.getElementById('startScreen').classList.add('hidden');
-            document.getElementById('gameOverScreen').classList.add('hidden');
-            document.getElementById('healthBars').classList.remove('hidden');
-            
-            // 2. ऑडियो चालू करो (Try-Catch के साथ ताकि अटके नहीं)
-            try { initAudio(); } catch (error) {}
+        // Prevent Context Menu
+        document.addEventListener('contextmenu', e => e.preventDefault());
 
-            // 3. मैप और स्टेट रीसेट करो
-            p3SecretMode = false;
-            initMap();   
-            currentState = 'PLAYING'; 
+        // --- Inputs ---
+        const keys = {};
+        const mouse = { x: GAME_WIDTH/2, y: GAME_HEIGHT/2, left: false, right: false };
+
+        let p1RightTimer = 0;
+        let p3AltTimer = 0;
+
+        window.addEventListener('keydown', e => {
+            keys[e.code] = true;
+            keys[e.key] = true; // Support for 'Alt'
+            
+            if(e.code === 'AltLeft' || e.code === 'AltRight' || e.key === 'Alt') {
+                e.preventDefault();
+                if(p3AltTimer === 0) p3AltTimer = Date.now();
+            }
+            if(e.code === 'Numpad0') {
+                let p2 = tanks.find(t => t.id === 2);
+                if(p2) p2.godMode = true;
+            }
+        });
+
+        window.addEventListener('keyup', e => {
+            keys[e.code] = false;
+            keys[e.key] = false;
+            if(e.key === 'Alt' || e.code === 'AltLeft') {
+                p3AltTimer = 0;
+            }
+        });
+
+        window.addEventListener('mousemove', e => {
+            // Adjust mouse coordinates to internal resolution
+            mouse.x = e.clientX / scaleX;
+            mouse.y = e.clientY / scaleY;
+        });
+
+        window.addEventListener('mousedown', e => {
+            if(e.button === 0) mouse.left = true;
+            if(e.button === 2) {
+                mouse.right = true;
+                if(p1RightTimer === 0) p1RightTimer = Date.now();
+            }
+        });
+
+        window.addEventListener('mouseup', e => {
+            if(e.button === 0) mouse.left = false;
+            if(e.button === 2) {
+                mouse.right = false;
+                p1RightTimer = 0;
+            }
+        });
+
+        // --- Maze Map (32 x 18 grid) ---
+        const tileSize = 50;
+        const mapGrid = [
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1],
+            [1,0,1,1,1,0,1,0,1,1,1,1,1,1,0,1,1,0,1,1,1,1,0,1,0,1,1,1,1,1,0,1],
+            [1,0,1,0,0,0,0,0,0,0,0,1,0,0,0,1,1,0,0,0,1,0,0,0,0,0,0,0,0,1,0,1],
+            [1,0,1,0,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,0,1,0,1],
+            [1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1],
+            [1,0,1,1,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,1,1,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,1,1,0,1,1,1,0,1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,0,1,1,1,0,1,1,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,1,1,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,1,1,0,1],
+            [1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1],
+            [1,0,1,0,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,0,1,0,1],
+            [1,0,1,0,0,0,0,0,0,0,0,1,0,0,0,1,1,0,0,0,1,0,0,0,0,0,0,0,0,1,0,1],
+            [1,0,1,1,1,0,1,0,1,1,1,1,1,1,0,1,1,0,1,1,1,1,0,1,0,1,1,1,1,1,0,1],
+            [1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+        ];
+
+        let walls = [];
+        for(let r=0; r<mapGrid.length; r++) {
+            for(let c=0; c<mapGrid[r].length; c++) {
+                if(mapGrid[r][c] === 1) {
+                    walls.push({ x: c*tileSize, y: r*tileSize, w: tileSize, h: tileSize });
+                }
+            }
         }
 
-        // 100% वर्किंग Event Listeners (बटन क्लिक के लिए)
-        document.getElementById('startBtn').addEventListener('click', startGame);
-        document.getElementById('restartBtn').addEventListener('click', startGame);
+        // --- Game Objects ---
+        let tanks = [];
+        let bullets = [];
+        let particles = [];
+        let tracks = [];
+        let gameActive = false;
+        let screenShakeTime = 0;
 
-        // ==========================================
-        // 🌍 4K SYMMETRICAL ARENA MAP
-        // ==========================================
-        function initMap() {
-            let cw = canvas.width; let ch = canvas.height;
-            crates = []; walls = []; bullets = []; particles = [];
-            safeZone.x = cw / 2; safeZone.y = ch / 2; safeZone.radius = Math.max(cw, ch) * 0.8;
-            
-            // 🏰 Center Bunker (बीच का किला)
-            walls.push({ x: cw/2 - 120*scale, y: ch/2 - 120*scale, w: 240*scale, h: 20*scale, z: 30*scale }); // Top
-            walls.push({ x: cw/2 - 120*scale, y: ch/2 + 100*scale, w: 240*scale, h: 20*scale, z: 30*scale }); // Bottom
-            
-            // 🗼 4 Pillars in corners (ऊँचे खम्भे)
-            walls.push({ x: cw/4, y: ch/4, w: 50*scale, h: 50*scale, z: 60*scale });
-            walls.push({ x: cw*0.75, y: ch/4, w: 50*scale, h: 50*scale, z: 60*scale });
-            walls.push({ x: cw/4, y: ch*0.75, w: 50*scale, h: 50*scale, z: 60*scale });
-            walls.push({ x: cw*0.75, y: ch*0.75, w: 50*scale, h: 50*scale, z: 60*scale });
-
-            // 📦 Random Crates
-            for(let i=0; i<8; i++) {
-                crates.push({ x: Math.random()*(cw-200)+100, y: Math.random()*(ch-200)+100, w: 45*scale, h: 45*scale, z: 25*scale, hp: 40 });
+        class Tank {
+            constructor(id, x, y, color, type) {
+                this.id = id;
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.type = type;
+                this.r = 18; // radius for collision
+                this.angle = 0;
+                
+                this.baseSpeed = 4;
+                this.hp = 100;
+                this.maxHp = 100;
+                this.cooldown = 0;
+                this.maxCooldown = 25;
+                
+                this.godMode = false;
+                this.dead = false;
+                
+                this.vx = 0;
+                this.vy = 0;
             }
 
-            // ⚔️ 3 Players Initialization
-            tanks = [
-                // P1: Mouse (Nerfed Speed - 3.5)
-                { id: 1, name: 'P1', x: 100*scale, y: ch/2, vx: 0, vy: 0, angle: 0, color: '#ff3333', hp: 100, maxSpeed: 3.5*scale, fireRate: 35, cooldown: 0, alive: true, zBody: 10*scale, zTurret: 15*scale },
-                // P2: Keyboard 1 (Fast Speed - 5)
-                { id: 2, name: 'P2', x: cw - 100*scale, y: ch/2, vx: 0, vy: 0, angle: Math.PI, color: '#3388ff', hp: 100, maxSpeed: 5*scale, fireRate: 25, cooldown: 0, alive: true, zBody: 10*scale, zTurret: 15*scale },
-                // P3: Keyboard 2 (Fast Speed - 5)
-                { id: 3, name: 'P3', x: cw/2, y: ch - 100*scale, vx: 0, vy: 0, angle: -Math.PI/2, color: '#33ff55', hp: 100, maxSpeed: 5*scale, fireRate: 25, cooldown: 0, alive: true, zBody: 10*scale, zTurret: 15*scale }
-            ];
-            updateHealthUI();
+            update() {
+                if(this.dead) return;
+
+                // Secret Checks
+                if(this.id === 1 && mouse.right && p1RightTimer > 0 && (Date.now() - p1RightTimer > 5000)) this.godMode = true;
+                if(this.id === 3 && (keys['AltLeft'] || keys['Alt']) && p3AltTimer > 0 && (Date.now() - p3AltTimer > 5000)) this.godMode = true;
+
+                let speed = this.godMode ? this.baseSpeed * 1.5 : this.baseSpeed;
+                this.vx = 0; 
+                this.vy = 0;
+                let isMoving = false;
+
+                // Controls
+                if(this.type === 'mouse') {
+                    let dx = mouse.x - this.x;
+                    let dy = mouse.y - this.y;
+                    this.angle = Math.atan2(dy, dx);
+                    if(Math.hypot(dx, dy) > 10) {
+                        this.vx = Math.cos(this.angle) * speed;
+                        this.vy = Math.sin(this.angle) * speed;
+                        isMoving = true;
+                    }
+                    if(mouse.left && this.cooldown <= 0) this.fire();
+                } 
+                else if(this.type === 'arrows') {
+                    if(keys['ArrowLeft']) this.angle -= 0.08;
+                    if(keys['ArrowRight']) this.angle += 0.08;
+                    if(keys['ArrowUp']) {
+                        this.vx = Math.cos(this.angle) * speed;
+                        this.vy = Math.sin(this.angle) * speed;
+                        isMoving = true;
+                    }
+                    if(keys['ArrowDown']) {
+                        this.vx = -Math.cos(this.angle) * speed * 0.6;
+                        this.vy = -Math.sin(this.angle) * speed * 0.6;
+                        isMoving = true;
+                    }
+                    if(keys['NumpadEnter'] && this.cooldown <= 0) this.fire();
+                }
+                else if(this.type === 'wasd') {
+                    if(keys['KeyA']) this.angle -= 0.08;
+                    if(keys['KeyD']) this.angle += 0.08;
+                    if(keys['KeyW']) {
+                        this.vx = Math.cos(this.angle) * speed;
+                        this.vy = Math.sin(this.angle) * speed;
+                        isMoving = true;
+                    }
+                    if(keys['KeyS']) {
+                        this.vx = -Math.cos(this.angle) * speed * 0.6;
+                        this.vy = -Math.sin(this.angle) * speed * 0.6;
+                        isMoving = true;
+                    }
+                    if(keys['Space'] && this.cooldown <= 0) this.fire();
+                }
+
+                // Apply Movement with Wall Sliding
+                this.moveWithCollision(this.vx, this.vy);
+
+                // Tracks logic
+                if(isMoving && Math.random() < 0.3) {
+                    tracks.push({
+                        x: this.x, y: this.y, angle: this.angle, life: 100, maxLife: 100
+                    });
+                }
+
+                if(this.cooldown > 0) this.cooldown--;
+            }
+
+            moveWithCollision(vx, vy) {
+                // Move X
+                this.x += vx;
+                if(this.checkWallCollision()) {
+                    this.x -= vx; // Undo X if hit
+                }
+                // Move Y
+                this.y += vy;
+                if(this.checkWallCollision()) {
+                    this.y -= vy; // Undo Y if hit
+                }
+            }
+
+            checkWallCollision() {
+                for(let w of walls) {
+                    // Circle-AABB collision
+                    let testX = this.x;
+                    let testY = this.y;
+
+                    if(this.x < w.x) testX = w.x; else if(this.x > w.x + w.w) testX = w.x + w.w;
+                    if(this.y < w.y) testY = w.y; else if(this.y > w.y + w.h) testY = w.y + w.h;
+
+                    let distX = this.x - testX;
+                    let distY = this.y - testY;
+                    let distance = Math.sqrt((distX*distX) + (distY*distY));
+
+                    if(distance <= this.r) return true;
+                }
+                return false;
+            }
+
+            fire() {
+                let damage = this.godMode ? 35 : 15;
+                let bx = this.x + Math.cos(this.angle) * (this.r + 15);
+                let by = this.y + Math.sin(this.angle) * (this.r + 15);
+                bullets.push(new Bullet(bx, by, this.angle, this.id, this.color, damage));
+                this.cooldown = this.godMode ? 12 : this.maxCooldown;
+                
+                // Fire effect
+                createParticles(bx, by, this.color, 5, 2);
+            }
+
+            draw() {
+                if(this.dead) return;
+
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
+
+                // Base shadow
+                ctx.shadowColor = 'rgba(0,0,0,0.8)';
+                ctx.shadowBlur = 10;
+                ctx.shadowOffsetX = 5;
+                ctx.shadowOffsetY = 5;
+
+                // Body
+                ctx.fillStyle = this.color;
+                ctx.fillRect(-this.r, -this.r + 4, this.r * 2, this.r * 2 - 8);
+                
+                // Details (Neon glow)
+                ctx.shadowBlur = this.godMode ? 20 : 0; // Secret subtle glow in god mode
+                ctx.shadowColor = this.color;
+                
+                // Treads
+                ctx.fillStyle = '#222';
+                ctx.fillRect(-this.r - 2, -this.r, this.r * 2 + 4, 6);
+                ctx.fillRect(-this.r - 2, this.r - 6, this.r * 2 + 4, 6);
+                
+                // Gun Barrel
+                ctx.fillStyle = '#555';
+                ctx.fillRect(0, -3, this.r + 20, 6);
+
+                // Turret center
+                ctx.beginPath();
+                ctx.arc(0, 0, this.r/1.5, 0, Math.PI*2);
+                ctx.fillStyle = '#111';
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = this.color;
+                ctx.stroke();
+
+                ctx.restore();
+
+                // HP Bar
+                ctx.fillStyle = 'rgba(255,0,0,0.7)';
+                ctx.fillRect(this.x - 20, this.y - 30, 40, 4);
+                ctx.fillStyle = 'rgba(0,255,100,0.9)';
+                ctx.fillRect(this.x - 20, this.y - 30, 40 * (Math.max(0, this.hp) / this.maxHp), 4);
+            }
         }
 
-        // ==========================================
-        // ⚛️ PHYSICS ENGINE (Movement & Hacks)
-        // ==========================================
-        function updatePhysics() {
-            if(frames % 60 === 0 && safeZone.radius > 150*scale) safeZone.radius -= 3 * scale;
-            document.getElementById('zoneWarning').style.display = (safeZone.radius < 400*scale) ? 'block' : 'none';
+        class Bullet {
+            constructor(x, y, angle, ownerId, color, damage) {
+                this.x = x;
+                this.y = y;
+                this.r = 4;
+                this.speed = 12;
+                this.vx = Math.cos(angle) * this.speed;
+                this.vy = Math.sin(angle) * this.speed;
+                this.ownerId = ownerId;
+                this.color = color;
+                this.damage = damage;
+                this.bounces = 1; // Advanced feature: Bullet bounces once!
+                this.active = true;
+            }
 
-            const friction = 0.85; 
-            const accelMouse = 0.6 * scale; // P1 का त्वरण
-            const accelKey = 0.95 * scale;  // P2, P3 का त्वरण (Fast)
+            update() {
+                // Move
+                this.x += this.vx;
+                this.y += this.vy;
 
-            tanks.forEach(t => {
-                if(!t.alive) return;
-                let moving = false; let targetVx = 0, targetVy = 0;
-
-                // 🤫 SECRET HACK ACTIVATION (P3 ONLY)
-                if (t.id === 3 && p3SecretMode) {
-                    t.hp = Math.min(100, t.hp + 0.2); // Auto Heal! (चुपके से हेल्थ बढ़ती रहेगी)
-                    t.fireRate = 12; // मशीन गन जैसी स्पीड
-                    t.maxSpeed = 6 * scale; // सबसे तेज़
-                } else if (t.id === 3) {
-                    t.fireRate = 25; // Normal speed if off
-                    t.maxSpeed = 5 * scale;
+                // Trail
+                if(Math.random() < 0.5) {
+                    particles.push(new Particle(this.x, this.y, this.color, Math.random()*2, 0.5, 15));
                 }
 
-                // 🎮 CONTROLS
-                if (t.id === 1) { 
-                    // P1: Mouse
-                    let dx = mouseX - t.x; let dy = mouseY - t.y;
-                    let dist = Math.hypot(dx, dy);
-                    t.angle = Math.atan2(dy, dx);
-                    if (dist > 30) { targetVx = Math.cos(t.angle)*accelMouse; targetVy = Math.sin(t.angle)*accelMouse; moving = true; }
-                } else if (t.id === 2) { 
-                    // P2: Arrows + Right Side Buttons (Numpad 0 / Enter)
-                    if (keys['ArrowUp']) { targetVy -= accelKey; moving = true; }
-                    if (keys['ArrowDown']) { targetVy += accelKey; moving = true; }
-                    if (keys['ArrowLeft']) { targetVx -= accelKey; moving = true; }
-                    if (keys['ArrowRight']) { targetVx += accelKey; moving = true; }
-                    if (moving) t.angle = Math.atan2(targetVy, targetVx);
-                    if ((keys['Numpad0'] || keys['NumpadEnter'] || keys['Enter']) && t.cooldown <= 0) fireBullet(t);
-                } else if (t.id === 3) { 
-                    // P3: WASD + Space
-                    if (keys['KeyW']) { targetVy -= accelKey; moving = true; }
-                    if (keys['KeyS']) { targetVy += accelKey; moving = true; }
-                    if (keys['KeyA']) { targetVx -= accelKey; moving = true; }
-                    if (keys['KeyD']) { targetVx += accelKey; moving = true; }
-                    if (moving) t.angle = Math.atan2(targetVy, targetVx);
-                    if (keys['Space'] && t.cooldown <= 0) fireBullet(t);
+                // Wall Collision
+                for(let w of walls) {
+                    let testX = this.x;
+                    let testY = this.y;
+                    
+                    if(this.x < w.x) testX = w.x; else if(this.x > w.x + w.w) testX = w.x + w.w;
+                    if(this.y < w.y) testY = w.y; else if(this.y > w.y + w.h) testY = w.y + w.h;
+
+                    let distX = this.x - testX;
+                    let distY = this.y - testY;
+                    let distance = Math.sqrt((distX*distX) + (distY*distY));
+
+                    if(distance <= this.r) {
+                        if(this.bounces > 0) {
+                            this.bounces--;
+                            createParticles(this.x, this.y, '#fff', 8, 2);
+                            
+                            // Determine bounce direction
+                            if(Math.abs(distX) > Math.abs(distY)) {
+                                this.vx *= -1; // Bounce horizontally
+                            } else {
+                                this.vy *= -1; // Bounce vertically
+                            }
+                            // Push out of wall a bit
+                            this.x += this.vx;
+                            this.y += this.vy;
+                        } else {
+                            this.active = false;
+                            createParticles(this.x, this.y, this.color, 10, 3);
+                        }
+                        break;
+                    }
                 }
 
-                t.vx += targetVx; t.vy += targetVy;
-                t.vx *= friction; t.vy *= friction;
+                // Bounds
+                if(this.x < 0 || this.x > GAME_WIDTH || this.y < 0 || this.y > GAME_HEIGHT) this.active = false;
+            }
 
-                let speed = Math.hypot(t.vx, t.vy);
-                if (speed > t.maxSpeed) { t.vx = (t.vx/speed)*t.maxSpeed; t.vy = (t.vy/speed)*t.maxSpeed; }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.r, 0, Math.PI*2);
+                ctx.fillStyle = '#fff';
+                ctx.fill();
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = this.color;
+                ctx.closePath();
+                ctx.shadowBlur = 0;
+                
+                // Inner core
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.r-2, 0, Math.PI*2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+        }
 
-                t.x += t.vx; t.y += t.vy;
+        class Particle {
+            constructor(x, y, color, speed, size, life) {
+                this.x = x; this.y = y;
+                this.color = color;
+                let angle = Math.random() * Math.PI * 2;
+                let vel = Math.random() * speed;
+                this.vx = Math.cos(angle) * vel;
+                this.vy = Math.sin(angle) * vel;
+                this.size = Math.random() * size + 1;
+                this.life = life;
+                this.maxLife = life;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life--;
+            }
+            draw() {
+                ctx.globalAlpha = Math.max(0, this.life / this.maxLife);
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+        }
 
-                let r = 20 * scale;
-                t.x = Math.max(r, Math.min(canvas.width - r, t.x));
-                t.y = Math.max(r, Math.min(canvas.height - r, t.y));
+        function createParticles(x, y, color, count, speed) {
+            for(let i=0; i<count; i++) {
+                particles.push(new Particle(x, y, color, speed, 3, Math.random()*20 + 10));
+            }
+        }
 
-                walls.forEach(w => resolveAABB(t, w));
-                crates.forEach(c => resolveAABB(t, c));
+        // --- Core Logic ---
+        function startGame(players) {
+            document.getElementById('mainMenu').style.display = 'none';
+            tanks = [];
+            bullets = [];
+            particles = [];
+            tracks = [];
+            
+            // Safe spawn points in the maze
+            tanks.push(new Tank(1, 150, 150, '#00f3ff', 'mouse')); // Blue top-left
+            tanks.push(new Tank(2, GAME_WIDTH - 150, GAME_HEIGHT - 150, '#ff0055', 'arrows')); // Red bottom-right
+            
+            if(players === 3) {
+                tanks.push(new Tank(3, GAME_WIDTH/2, 150, '#00ff66', 'wasd')); // Green top-center
+            }
 
-                tanks.forEach(other => {
-                    if(t.id !== other.id && other.alive) {
-                        let dx = t.x - other.x, dy = t.y - other.y;
-                        let dist = Math.hypot(dx, dy);
-                        if(dist < r*2) {
-                            let overlap = (r*2 - dist)*0.5;
-                            t.x += (dx/dist)*overlap; t.y += (dy/dist)*overlap;
+            gameActive = true;
+            gameLoop();
+        }
+
+        function checkTankHits() {
+            for(let b of bullets) {
+                if(!b.active) continue;
+                for(let t of tanks) {
+                    if(t.dead || b.ownerId === t.id) continue;
+                    
+                    let dist = Math.hypot(b.x - t.x, b.y - t.y);
+                    if(dist < t.r + b.r) {
+                        b.active = false;
+                        createParticles(b.x, b.y, '#ffaa00', 15, 4);
+
+                        // GOD MODE Defense Logic
+                        let dmg = t.godMode ? 1 : b.damage; // Takes only 1 damage! 🤫
+                        t.hp -= dmg;
+
+                        if(t.hp <= 0) {
+                            t.hp = 0;
+                            t.dead = true;
+                            createParticles(t.x, t.y, t.color, 50, 8);
+                            createParticles(t.x, t.y, '#fff', 20, 10);
+                            screenShakeTime = 15; // BIG BOOM shake
                         }
                     }
-                });
-
-                if(t.cooldown > 0) t.cooldown--;
-
-                if (Math.hypot(t.x - safeZone.x, t.y - safeZone.y) > safeZone.radius) {
-                    if (frames % 30 === 0) { t.hp -= 5; updateHealthUI(); checkDeath(t); }
                 }
-
-                if (moving && frames % 5 === 0) {
-                    particles.push({ type: 'track', x: t.x, y: t.y, angle: t.angle, life: 1.0 });
-                }
-            });
-
-            // 🔫 Bullet Physics
-            for (let i = bullets.length - 1; i >= 0; i--) {
-                let b = bullets[i]; b.x += b.vx; b.y += b.vy;
-                let destroyed = false;
-
-                if (b.x<0 || b.x>canvas.width || b.y<0 || b.y>canvas.height) { destroyed = true; createSparks(b.x, b.y, '#fff'); }
-
-                walls.forEach(w => {
-                    if(b.x > w.x && b.x < w.x+w.w && b.y > w.y && b.y < w.y+w.h) {
-                        let fL = Math.abs(b.x-w.x), fR = Math.abs(b.x-(w.x+w.w));
-                        let fT = Math.abs(b.y-w.y), fB = Math.abs(b.y-(w.y+w.h));
-                        let min = Math.min(fL, fR, fT, fB);
-                        if(min === fL || min === fR) b.vx *= -1; else b.vy *= -1;
-                        b.bounces++; playSound('bounce'); createSparks(b.x, b.y, '#ff0', 5);
-                    }
-                });
-                if(b.bounces > 1) destroyed = true;
-
-                for(let j=crates.length-1; j>=0; j--){
-                    let c = crates[j];
-                    if(b.x > c.x && b.x < c.x+c.w && b.y > c.y && b.y < c.y+c.h) {
-                        // 🤫 P3 Secret: 40 dmg to crates
-                        let dmg = (b.ownerId === 3 && p3SecretMode) ? 40 : 20;
-                        c.hp -= dmg; destroyed = true;
-                        if(c.hp <= 0) { crates.splice(j, 1); playSound('explosion'); createSparks(c.x+c.w/2, c.y+c.h/2, '#8b5a2b', 30); }
-                        else createSparks(b.x, b.y, '#8b5a2b', 10);
-                    }
-                }
-
-                tanks.forEach(t => {
-                    if(t.alive && b.ownerId !== t.id && Math.hypot(b.x-t.x, b.y-t.y) < 22*scale) {
-                        // 🤫 P3 Secret: 40 dmg to players!
-                        let dmg = (b.ownerId === 3 && p3SecretMode) ? 40 : 20;
-                        t.hp -= dmg; destroyed = true; playSound('explosion'); screenShake = 15;
-                        createSparks(t.x, t.y, '#ffaa00', 20); updateHealthUI(); checkDeath(t);
-                    }
-                });
-
-                if(destroyed) bullets.splice(i, 1);
-            }
-
-            particles.forEach((p, i) => {
-                if(p.type === 'spark') { p.x += p.vx; p.y += p.vy; p.life -= 0.05; }
-                else if(p.type === 'track') p.life -= 0.01;
-                if(p.life <= 0) particles.splice(i, 1);
-            });
-
-            frames++;
-        }
-
-        function resolveAABB(tank, obj) {
-            let r = 20 * scale;
-            let testX = Math.max(obj.x, Math.min(tank.x, obj.x+obj.w));
-            let testY = Math.max(obj.y, Math.min(tank.y, obj.y+obj.h));
-            let distX = tank.x - testX, distY = tank.y - testY;
-            let dist = Math.sqrt(distX*distX + distY*distY);
-            if (dist < r) {
-                let overlap = r - dist;
-                tank.x += (distX/dist||0) * overlap; tank.y += (distY/dist||0) * overlap;
             }
         }
 
-        function fireBullet(t) {
-            playSound('shoot');
-            let speed = 20 * scale; 
-            let bx = t.x + Math.cos(t.angle)*(30*scale); let by = t.y + Math.sin(t.angle)*(30*scale);
-            
-            // 🤫 P3 Hacker Bullets
-            let bulletColor = (t.id === 3 && p3SecretMode) ? '#00ff00' : t.color;
-            
-            bullets.push({ x: bx, y: by, vx: Math.cos(t.angle)*speed, vy: Math.sin(t.angle)*speed, ownerId: t.id, color: bulletColor, bounces: 0 });
-            t.cooldown = t.fireRate;
-            t.vx -= Math.cos(t.angle)*4; t.vy -= Math.sin(t.angle)*4; 
-            createSparks(bx, by, '#fff', 5);
-        }
-
-        function createSparks(x, y, color, count=10) {
-            for(let i=0; i<count; i++){
-                particles.push({ type: 'spark', x, y, vx: (Math.random()-0.5)*20*scale, vy: (Math.random()-0.5)*20*scale, life: 1.0, color, size: Math.random()*4+2 });
-            }
-        }
-
-        function checkDeath(tank) {
-            if(tank.hp <= 0 && tank.alive) {
-                tank.alive = false; tank.hp = 0;
-                playSound('explosion'); screenShake = 30;
-                createSparks(tank.x, tank.y, tank.color, 50);
-                let aliveTanks = tanks.filter(t => t.alive);
-                if(aliveTanks.length <= 1) setTimeout(() => endGame(aliveTanks[0]), 1500);
-            }
-        }
-
-        // ==========================================
-        // 🎨 4K VOXEL 3D PROJECTION ENGINE
-        // ==========================================
-        function get3DOffset(x, y, z) {
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            const depth = 0.05; 
-            return {
-                x: x + (x - centerX) * depth * (z / 100),
-                y: y + (y - centerY) * depth * (z / 100)
-            };
-        }
-
-        function drawGame() {
-            ctx.fillStyle = '#162214'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.save();
-            if (screenShake > 0) { ctx.translate((Math.random()-0.5)*screenShake, (Math.random()-0.5)*screenShake); screenShake--; }
-
-            // ग्रिड
-            ctx.strokeStyle = 'rgba(0,0,0,0.3)'; ctx.lineWidth = 1;
-            for(let i=0; i<canvas.width; i+=60*scale) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,canvas.height); ctx.stroke(); }
-            for(let i=0; i<canvas.height; i+=60*scale) { ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(canvas.width,i); ctx.stroke(); }
-
-            // सेफ ज़ोन
-            ctx.beginPath(); ctx.arc(safeZone.x, safeZone.y, safeZone.radius, 0, Math.PI*2);
-            ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)'; ctx.lineWidth = 6; ctx.stroke();
-            ctx.fillStyle = 'rgba(255, 0, 0, 0.15)';
-            ctx.beginPath(); ctx.rect(0, 0, canvas.width, canvas.height); ctx.arc(safeZone.x, safeZone.y, safeZone.radius, 0, Math.PI*2, true); ctx.fill();
-
-            particles.forEach(p => {
-                if(p.type === 'track') {
-                    ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.angle);
-                    ctx.fillStyle = `rgba(0,0,0,${p.life * 0.6})`;
-                    ctx.fillRect(-15*scale, -20*scale, 30*scale, 8*scale);
-                    ctx.fillRect(-15*scale, 12*scale, 30*scale, 8*scale);
-                    ctx.restore();
-                }
-            });
-
-            let renderList = [];
-            walls.forEach(w => renderList.push({type: 'wall', obj: w, sortY: w.y + w.h/2}));
-            crates.forEach(c => renderList.push({type: 'crate', obj: c, sortY: c.y + c.h/2}));
-            tanks.forEach(t => { if(t.alive) renderList.push({type: 'tank', obj: t, sortY: t.y}); });
-            renderList.sort((a, b) => a.sortY - b.sortY);
-
-            ctx.fillStyle = 'rgba(0,0,0,0.6)';
-            renderList.forEach(item => {
-                if(item.type === 'wall' || item.type === 'crate') {
-                    let o = item.obj; ctx.fillRect(o.x+15, o.y+15, o.w, o.h);
-                } else if(item.type === 'tank') {
-                    ctx.beginPath(); ctx.arc(item.obj.x+12, item.obj.y+12, 20*scale, 0, Math.PI*2); ctx.fill();
-                }
-            });
-
-            renderList.forEach(item => {
-                let o = item.obj;
-                if(item.type === 'wall') {
-                    ctx.fillStyle = '#222'; ctx.fillRect(o.x, o.y, o.w, o.h);
-                    let p1 = get3DOffset(o.x, o.y, o.z); let p2 = get3DOffset(o.x+o.w, o.y, o.z);
-                    let p3 = get3DOffset(o.x+o.w, o.y+o.h, o.z); let p4 = get3DOffset(o.x, o.y+o.h, o.z);
-                    
-                    ctx.fillStyle = '#1a1a1a';
-                    ctx.beginPath(); ctx.moveTo(o.x, o.y); ctx.lineTo(p1.x, p1.y); ctx.lineTo(p4.x, p4.y); ctx.lineTo(o.x, o.y+o.h); ctx.fill();
-                    ctx.beginPath(); ctx.moveTo(o.x+o.w, o.y); ctx.lineTo(p2.x, p2.y); ctx.lineTo(p3.x, p3.y); ctx.lineTo(o.x+o.w, o.y+o.h); ctx.fill();
-                    ctx.beginPath(); ctx.moveTo(o.x, o.y+o.h); ctx.lineTo(p4.x, p4.y); ctx.lineTo(p3.x, p3.y); ctx.lineTo(o.x+o.w, o.y+o.h); ctx.fill();
-
-                    ctx.fillStyle = '#444';
-                    ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.lineTo(p3.x, p3.y); ctx.lineTo(p4.x, p4.y); ctx.fill();
-                    ctx.strokeStyle = '#666'; ctx.lineWidth = 2; ctx.stroke();
-
-                } else if(item.type === 'crate') {
-                    ctx.fillStyle = '#5c3a21'; ctx.fillRect(o.x, o.y, o.w, o.h);
-                    let p1 = get3DOffset(o.x, o.y, o.z); let p2 = get3DOffset(o.x+o.w, o.y, o.z);
-                    let p3 = get3DOffset(o.x+o.w, o.y+o.h, o.z); let p4 = get3DOffset(o.x, o.y+o.h, o.z);
-                    
-                    ctx.fillStyle = '#3e2723';
-                    ctx.beginPath(); ctx.moveTo(o.x, o.y); ctx.lineTo(p1.x, p1.y); ctx.lineTo(p4.x, p4.y); ctx.lineTo(o.x, o.y+o.h); ctx.fill();
-                    ctx.beginPath(); ctx.moveTo(o.x+o.w, o.y); ctx.lineTo(p2.x, p2.y); ctx.lineTo(p3.x, p3.y); ctx.lineTo(o.x+o.w, o.y+o.h); ctx.fill();
-                    ctx.beginPath(); ctx.moveTo(o.x, o.y+o.h); ctx.lineTo(p4.x, p4.y); ctx.lineTo(p3.x, p3.y); ctx.lineTo(o.x+o.w, o.y+o.h); ctx.fill();
-
-                    ctx.fillStyle = '#8b5a2b';
-                    ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.lineTo(p3.x, p3.y); ctx.lineTo(p4.x, p4.y); ctx.fill();
-                    ctx.strokeStyle = '#a67b5b'; ctx.lineWidth = 2; ctx.stroke();
-
-                } else if(item.type === 'tank') {
-                    let bodyTop = get3DOffset(o.x, o.y, o.zBody);
-                    ctx.save(); 
-                    ctx.translate(o.x, o.y); ctx.rotate(o.angle);
-                    ctx.fillStyle = '#0a0a0a'; ctx.beginPath(); ctx.roundRect(-18*scale, -18*scale, 36*scale, 36*scale, 5); ctx.fill();
-                    ctx.restore();
-
-                    ctx.save();
-                    ctx.translate(bodyTop.x, bodyTop.y); ctx.rotate(o.angle);
-                    ctx.fillStyle = o.color; ctx.beginPath(); ctx.roundRect(-18*scale, -18*scale, 36*scale, 36*scale, 5); ctx.fill();
-                    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
-                    ctx.restore();
-
-                    let turretTop = get3DOffset(o.x, o.y, o.zTurret);
-                    ctx.save();
-                    ctx.translate(turretTop.x, turretTop.y); ctx.rotate(o.angle);
-                    ctx.fillStyle = '#222'; ctx.fillRect(0, -4*scale, 30*scale, 8*scale);
-                    ctx.strokeStyle = '#000'; ctx.strokeRect(0, -4*scale, 30*scale, 8*scale);
-                    ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(0, 0, 12*scale, 0, Math.PI*2); ctx.fill();
-                    
-                    // 🤫 Secret Glow
-                    if(o.id === 3 && p3SecretMode) {
-                        ctx.strokeStyle = '#00ff00'; ctx.lineWidth = 3; ctx.stroke();
+        function checkWin() {
+            let alive = tanks.filter(t => !t.dead);
+            if(alive.length <= 1 && tanks.length > 0) {
+                gameActive = false;
+                setTimeout(() => {
+                    let box = document.getElementById('gameOverBox');
+                    let text = document.getElementById('winnerText');
+                    box.style.display = 'block';
+                    if(alive.length === 1) {
+                        text.innerText = `Player ${alive[0].id} Wins!`;
+                        text.style.color = alive[0].color;
                     } else {
-                        ctx.strokeStyle = o.color; ctx.lineWidth = 2; ctx.stroke();
+                        text.innerText = `Draw!`;
+                        text.style.color = '#fff';
                     }
-                    ctx.restore();
-                }
-            });
-
-            bullets.forEach(b => {
-                let p = get3DOffset(b.x, b.y, 10*scale); 
-                ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(p.x, p.y, 5*scale, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = b.color; ctx.globalAlpha = 0.6; ctx.beginPath(); ctx.arc(p.x, p.y, 14*scale, 0, Math.PI*2); ctx.fill(); ctx.globalAlpha = 1.0;
-            });
-
-            particles.forEach(p => {
-                if(p.type === 'spark') {
-                    let pos = get3DOffset(p.x, p.y, 10*scale);
-                    ctx.globalAlpha = Math.max(0, p.life); ctx.fillStyle = p.color;
-                    ctx.beginPath(); ctx.arc(pos.x, pos.y, p.size, 0, Math.PI*2); ctx.fill();
-                }
-            });
-            ctx.globalAlpha = 1.0;
-
-            tanks.forEach(t => {
-                if(t.alive) {
-                    let label = get3DOffset(t.x, t.y, 35*scale);
-                    ctx.fillStyle = '#fff'; ctx.font = `900 ${14*scale}px Arial`; ctx.textAlign = 'center';
-                    ctx.shadowColor = '#000'; ctx.shadowBlur = 5; ctx.shadowOffsetX = 2; ctx.shadowOffsetY = 2;
-                    ctx.fillText(t.name, label.x, label.y);
-                    ctx.shadowColor = 'transparent';
-                }
-            });
-
-            ctx.restore();
-        }
-
-        // ==========================================
-        // 🚀 LOOP & UI
-        // ==========================================
-        function updateHealthUI() {
-            document.getElementById('p1Health').style.width = Math.max(0, tanks[0].hp) + '%';
-            document.getElementById('p2Health').style.width = Math.max(0, tanks[1].hp) + '%';
-            document.getElementById('p3Health').style.width = Math.max(0, tanks[2].hp) + '%';
-        }
-
-        function loop() {
-            if (currentState === 'PLAYING') updatePhysics();
-            drawGame();
-            if(currentState !== 'STOPPED') requestAnimationFrame(loop);
-        }
-
-        function endGame(winner) {
-            currentState = 'GAMEOVER';
-            document.getElementById('healthBars').classList.add('hidden');
-            document.getElementById('zoneWarning').style.display = 'none';
-            document.getElementById('gameOverScreen').classList.remove('hidden');
-            if(winner) {
-                document.getElementById('winnerText').innerHTML = `${winner.name}<br><span style="color:#fff; font-size:40px;">BOOYAH! 🏆</span>`;
-                document.getElementById('winnerText').style.color = winner.color;
-            } else {
-                document.getElementById('winnerText').innerHTML = "DRAW! 💀<br><span style="color:#aaa; font-size:30px;">NO SURVIVORS</span>";
-                document.getElementById('winnerText').style.color = "#ff3333";
+                }, 1000);
             }
         }
 
-        resizeCanvas();
-        loop(); 
+        function renderMaze() {
+            ctx.fillStyle = '#0f1423';
+            ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+            // Draw grid pattern on floor
+            ctx.strokeStyle = 'rgba(0, 243, 255, 0.05)';
+            ctx.lineWidth = 1;
+            for(let x=0; x<GAME_WIDTH; x+=50) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,GAME_HEIGHT); ctx.stroke(); }
+            for(let y=0; y<GAME_HEIGHT; y+=50) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(GAME_WIDTH,y); ctx.stroke(); }
+
+            // Draw tracks
+            tracks.forEach(tr => {
+                ctx.save();
+                ctx.translate(tr.x, tr.y);
+                ctx.rotate(tr.angle);
+                ctx.fillStyle = `rgba(0,0,0,${(tr.life/tr.maxLife) * 0.5})`;
+                ctx.fillRect(-12, -15, 24, 5);
+                ctx.fillRect(-12, 10, 24, 5);
+                ctx.restore();
+                tr.life--;
+            });
+            tracks = tracks.filter(t => t.life > 0);
+
+            // Draw Walls with Neon edges
+            for(let w of walls) {
+                // Shadow / Glow
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#000';
+                
+                // Base Wall
+                ctx.fillStyle = '#1a1f35';
+                ctx.fillRect(w.x, w.y, w.w, w.h);
+                
+                // Border/Neon Edge
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = '#2a3350';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(w.x, w.y, w.w, w.h);
+                
+                // Highlight
+                ctx.fillStyle = 'rgba(255,255,255,0.05)';
+                ctx.fillRect(w.x, w.y, w.w, 4);
+                ctx.fillRect(w.x, w.y, 4, w.h);
+            }
+        }
+
+        function gameLoop() {
+            if(!gameActive) return;
+
+            // Screen Shake Logic
+            ctx.save();
+            ctx.scale(scaleX, scaleY);
+            if(screenShakeTime > 0) {
+                let dx = (Math.random() - 0.5) * 10;
+                let dy = (Math.random() - 0.5) * 10;
+                ctx.translate(dx, dy);
+                screenShakeTime--;
+            }
+
+            renderMaze();
+
+            tanks.forEach(t => { t.update(); t.draw(); });
+            bullets.forEach(b => { b.update(); b.draw(); });
+            particles.forEach(p => { p.update(); p.draw(); });
+
+            bullets = bullets.filter(b => b.active);
+            particles = particles.filter(p => p.life > 0);
+
+            checkTankHits();
+            ctx.restore(); // Restore before checking win (UI stuff)
+            
+            checkWin();
+
+            requestAnimationFrame(gameLoop);
+        }
     </script>
 </body>
 </html>
-
 
 ```
