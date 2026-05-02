@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Tank War - The Maze</title>
+    <title>Super Tank Arena</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
             user-select: none;
         }
         body {
-            background-color: #0a0a0a;
+            background-color: #050505;
             color: #fff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             overflow: hidden; 
@@ -22,111 +22,85 @@
             display: block;
             width: 100vw;
             height: 100vh;
-            background: radial-gradient(circle at center, #1a1a2e 0%, #0f0f1a 100%);
+            background: linear-gradient(135deg, #0f172a 0%, #020617 100%);
         }
-        #ui-layer {
+        #uiLayer {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; /* Let clicks pass through to canvas */
+            pointer-events: none;
         }
-        .menu-container {
+        .panel {
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(10, 10, 20, 0.95);
+            background: rgba(15, 23, 42, 0.9);
             padding: 40px;
-            border-radius: 15px;
-            border: 2px solid #00f3ff;
-            box-shadow: 0 0 30px rgba(0, 243, 255, 0.3), inset 0 0 20px rgba(0, 243, 255, 0.1);
+            border-radius: 20px;
+            border: 2px solid #38bdf8;
+            box-shadow: 0 0 40px rgba(56, 189, 248, 0.2);
             text-align: center;
             pointer-events: auto;
-            z-index: 100;
+            z-index: 10;
         }
         h1 {
             font-size: 3.5rem;
             margin-bottom: 20px;
-            color: #fff;
-            text-shadow: 0 0 10px #00f3ff, 0 0 20px #00f3ff;
-            letter-spacing: 2px;
+            color: #e0f2fe;
+            text-shadow: 0 0 15px #38bdf8;
         }
         .btn {
-            background: transparent;
-            color: #00f3ff;
-            border: 2px solid #00f3ff;
-            padding: 15px 40px;
+            background: #0284c7;
+            color: white;
+            border: none;
+            padding: 15px 35px;
             font-size: 1.2rem;
             margin: 10px;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: 0.3s;
             font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
         .btn:hover {
-            background: #00f3ff;
-            color: #000;
-            box-shadow: 0 0 20px #00f3ff;
-            transform: scale(1.05);
+            background: #38bdf8;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(56, 189, 248, 0.4);
         }
-        .instructions {
+        .controls {
             margin-top: 30px;
             text-align: left;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.4);
             padding: 20px;
             border-radius: 10px;
-            border-left: 4px solid #ff0055;
         }
-        .instructions p {
-            margin: 8px 0;
-            font-size: 0.95rem;
-            color: #ddd;
-        }
-        .instructions span {
-            color: #ffcc00;
-            font-weight: bold;
-        }
-        #gameOverBox {
-            display: none;
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
-            padding: 50px;
-            border-radius: 15px;
-            border: 2px solid #ffcc00;
-            text-align: center;
-            pointer-events: auto;
-            z-index: 200;
-            box-shadow: 0 0 50px rgba(255, 204, 0, 0.4);
-        }
-        #winnerText {
+        .controls p { margin: 8px 0; color: #cbd5e1; font-size: 1rem; }
+        .controls strong { color: #f8fafc; }
+        
+        #gameOverPanel { display: none; }
+        .win-text {
             font-size: 3rem;
-            margin-bottom: 30px;
-            text-shadow: 0 0 15px currentColor;
-            font-weight: bold;
+            margin-bottom: 20px;
+            font-weight: 800;
         }
     </style>
 </head>
 <body>
 
-    <div id="ui-layer">
-        <div id="mainMenu" class="menu-container">
-            <h1>TANK MAZE</h1>
-            <button class="btn" onclick="startGame(2)">Battle - 2 Players</button>
-            <button class="btn" onclick="startGame(3)">Battle - 3 Players</button>
-            
-            <div class="instructions">
-                <p><span>🔵 Player 1 (Mouse):</span> Mouse to Move/Aim | Left Click to Fire</p>
-                <p><span>🔴 Player 2 (Arrows):</span> Arrow Keys to Move | Numpad Enter to Fire</p>
-                <p><span>🟢 Player 3 (WASD):</span> W,A,S,D to Move | Space to Fire</p>
-                <p style="margin-top: 15px; color: #00f3ff; font-size: 0.85rem;">* Bullets bounce off walls once!</p>
+    <div id="uiLayer">
+        <div id="startPanel" class="panel">
+            <h1>TANK ARENA</h1>
+            <button class="btn" onclick="startGame(2)">2 Players Battle</button>
+            <button class="btn" onclick="startGame(3)">3 Players Battle</button>
+            <div class="controls">
+                <p>🔵 <strong>Player 1:</strong> Mouse Move/Aim | Left Click Fire</p>
+                <p>🔴 <strong>Player 2:</strong> Arrow Keys Move | Numpad Enter Fire</p>
+                <p>🟢 <strong>Player 3:</strong> W,A,S,D Move | Space Fire</p>
             </div>
         </div>
 
-        <div id="gameOverBox">
-            <div id="winnerText">Player Wins!</div>
-            <button class="btn" onclick="location.reload()" style="border-color:#ffcc00; color:#ffcc00;">Play Again</button>
+        <div id="gameOverPanel" class="panel">
+            <div id="winnerText" class="win-text">Player Wins!</div>
+            <button class="btn" onclick="location.reload()">Play Again</button>
         </div>
     </div>
 
@@ -135,41 +109,55 @@
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-
-        // Game resolution (internal)
-        const GAME_WIDTH = 1600;
-        const GAME_HEIGHT = 900;
         
-        let scaleX = 1;
-        let scaleY = 1;
+        let width, height;
+        let walls = [];
 
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            scaleX = canvas.width / GAME_WIDTH;
-            scaleY = canvas.height / GAME_HEIGHT;
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            generateMap(); // Re-generate map if screen size changes
         }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+        window.addEventListener('resize', resize);
 
-        // Prevent Context Menu
+        // Map Generator (Clean and open but with strategic covers)
+        function generateMap() {
+            walls = [];
+            let w = width; let h = height;
+            
+            // Central Cover
+            walls.push({ x: w/2 - 75, y: h/2 - 75, w: 150, h: 150 });
+            
+            // Four Corner Barriers
+            walls.push({ x: w*0.15, y: h*0.2, w: 20, h: h*0.25 });
+            walls.push({ x: w*0.85 - 20, y: h*0.55, w: 20, h: h*0.25 });
+            
+            walls.push({ x: w*0.2, y: h*0.8, w: w*0.15, h: 20 });
+            walls.push({ x: w*0.65, y: h*0.15, w: w*0.15, h: 20 });
+        }
+
+        resize(); // Initial setup
+
+        // Prevent Right Click Menu (Crucial for Player 1)
         document.addEventListener('contextmenu', e => e.preventDefault());
 
-        // --- Inputs ---
+        // Inputs
         const keys = {};
-        const mouse = { x: GAME_WIDTH/2, y: GAME_HEIGHT/2, left: false, right: false };
+        const mouse = { x: width/2, y: height/2, left: false, right: false };
 
-        let p1RightTimer = 0;
-        let p3AltTimer = 0;
+        let p1GodTimer = 0;
+        let p3GodTimer = 0;
 
         window.addEventListener('keydown', e => {
             keys[e.code] = true;
-            keys[e.key] = true; // Support for 'Alt'
+            keys[e.key] = true; 
             
+            // Player 3 God Mode Trigger (Alt)
             if(e.code === 'AltLeft' || e.code === 'AltRight' || e.key === 'Alt') {
                 e.preventDefault();
-                if(p3AltTimer === 0) p3AltTimer = Date.now();
+                if(p3GodTimer === 0) p3GodTimer = Date.now();
             }
+            // Player 2 God Mode Trigger (Numpad 0)
             if(e.code === 'Numpad0') {
                 let p2 = tanks.find(t => t.id === 2);
                 if(p2) p2.godMode = true;
@@ -180,21 +168,20 @@
             keys[e.code] = false;
             keys[e.key] = false;
             if(e.key === 'Alt' || e.code === 'AltLeft') {
-                p3AltTimer = 0;
+                p3GodTimer = 0; // Reset if released early
             }
         });
 
         window.addEventListener('mousemove', e => {
-            // Adjust mouse coordinates to internal resolution
-            mouse.x = e.clientX / scaleX;
-            mouse.y = e.clientY / scaleY;
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
         });
 
         window.addEventListener('mousedown', e => {
             if(e.button === 0) mouse.left = true;
             if(e.button === 2) {
                 mouse.right = true;
-                if(p1RightTimer === 0) p1RightTimer = Date.now();
+                if(p1GodTimer === 0) p1GodTimer = Date.now(); // Player 1 God Mode Trigger
             }
         });
 
@@ -202,48 +189,15 @@
             if(e.button === 0) mouse.left = false;
             if(e.button === 2) {
                 mouse.right = false;
-                p1RightTimer = 0;
+                p1GodTimer = 0;
             }
         });
 
-        // --- Maze Map (32 x 18 grid) ---
-        const tileSize = 50;
-        const mapGrid = [
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-            [1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1],
-            [1,0,1,1,1,0,1,0,1,1,1,1,1,1,0,1,1,0,1,1,1,1,0,1,0,1,1,1,1,1,0,1],
-            [1,0,1,0,0,0,0,0,0,0,0,1,0,0,0,1,1,0,0,0,1,0,0,0,0,0,0,0,0,1,0,1],
-            [1,0,1,0,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,0,1,0,1],
-            [1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1],
-            [1,0,1,1,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,1,1,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,1,1,0,1,1,1,0,1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,0,1,1,1,0,1,1,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,1,1,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,1,1,0,1],
-            [1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1],
-            [1,0,1,0,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,0,1,0,1],
-            [1,0,1,0,0,0,0,0,0,0,0,1,0,0,0,1,1,0,0,0,1,0,0,0,0,0,0,0,0,1,0,1],
-            [1,0,1,1,1,0,1,0,1,1,1,1,1,1,0,1,1,0,1,1,1,1,0,1,0,1,1,1,1,1,0,1],
-            [1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1],
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-        ];
-
-        let walls = [];
-        for(let r=0; r<mapGrid.length; r++) {
-            for(let c=0; c<mapGrid[r].length; c++) {
-                if(mapGrid[r][c] === 1) {
-                    walls.push({ x: c*tileSize, y: r*tileSize, w: tileSize, h: tileSize });
-                }
-            }
-        }
-
-        // --- Game Objects ---
+        // Game Objects
         let tanks = [];
         let bullets = [];
         let particles = [];
-        let tracks = [];
         let gameActive = false;
-        let screenShakeTime = 0;
 
         class Tank {
             constructor(id, x, y, color, type) {
@@ -252,106 +206,87 @@
                 this.y = y;
                 this.color = color;
                 this.type = type;
-                this.r = 18; // radius for collision
+                this.radius = 20;
                 this.angle = 0;
                 
-                this.baseSpeed = 4;
                 this.hp = 100;
                 this.maxHp = 100;
+                this.baseSpeed = 4.5; // Smooth fast movement
                 this.cooldown = 0;
-                this.maxCooldown = 25;
                 
                 this.godMode = false;
                 this.dead = false;
-                
-                this.vx = 0;
-                this.vy = 0;
             }
 
             update() {
                 if(this.dead) return;
 
-                // Secret Checks
-                if(this.id === 1 && mouse.right && p1RightTimer > 0 && (Date.now() - p1RightTimer > 5000)) this.godMode = true;
-                if(this.id === 3 && (keys['AltLeft'] || keys['Alt']) && p3AltTimer > 0 && (Date.now() - p3AltTimer > 5000)) this.godMode = true;
+                // --- SECRET GOD MODE CHECK ---
+                if(this.id === 1 && mouse.right && p1GodTimer > 0 && Date.now() - p1GodTimer > 5000) this.godMode = true;
+                if(this.id === 3 && (keys['Alt'] || keys['AltLeft']) && p3GodTimer > 0 && Date.now() - p3GodTimer > 5000) this.godMode = true;
 
-                let speed = this.godMode ? this.baseSpeed * 1.5 : this.baseSpeed;
-                this.vx = 0; 
-                this.vy = 0;
-                let isMoving = false;
+                let currentSpeed = this.godMode ? this.baseSpeed * 1.6 : this.baseSpeed;
+                let vx = 0, vy = 0;
 
-                // Controls
+                // --- CONTROLS ---
                 if(this.type === 'mouse') {
+                    // P1: Smoothly aim and move towards mouse
                     let dx = mouse.x - this.x;
                     let dy = mouse.y - this.y;
                     this.angle = Math.atan2(dy, dx);
-                    if(Math.hypot(dx, dy) > 10) {
-                        this.vx = Math.cos(this.angle) * speed;
-                        this.vy = Math.sin(this.angle) * speed;
-                        isMoving = true;
+                    
+                    let dist = Math.hypot(dx, dy);
+                    if(dist > this.radius) { // Don't jitter when mouse is on tank
+                        vx = Math.cos(this.angle) * currentSpeed;
+                        vy = Math.sin(this.angle) * currentSpeed;
                     }
                     if(mouse.left && this.cooldown <= 0) this.fire();
                 } 
                 else if(this.type === 'arrows') {
+                    // P2: Classic tank controls
                     if(keys['ArrowLeft']) this.angle -= 0.08;
                     if(keys['ArrowRight']) this.angle += 0.08;
                     if(keys['ArrowUp']) {
-                        this.vx = Math.cos(this.angle) * speed;
-                        this.vy = Math.sin(this.angle) * speed;
-                        isMoving = true;
+                        vx = Math.cos(this.angle) * currentSpeed;
+                        vy = Math.sin(this.angle) * currentSpeed;
                     }
                     if(keys['ArrowDown']) {
-                        this.vx = -Math.cos(this.angle) * speed * 0.6;
-                        this.vy = -Math.sin(this.angle) * speed * 0.6;
-                        isMoving = true;
+                        vx = -Math.cos(this.angle) * (currentSpeed * 0.6);
+                        vy = -Math.sin(this.angle) * (currentSpeed * 0.6);
                     }
                     if(keys['NumpadEnter'] && this.cooldown <= 0) this.fire();
                 }
                 else if(this.type === 'wasd') {
+                    // P3: Classic tank controls
                     if(keys['KeyA']) this.angle -= 0.08;
                     if(keys['KeyD']) this.angle += 0.08;
                     if(keys['KeyW']) {
-                        this.vx = Math.cos(this.angle) * speed;
-                        this.vy = Math.sin(this.angle) * speed;
-                        isMoving = true;
+                        vx = Math.cos(this.angle) * currentSpeed;
+                        vy = Math.sin(this.angle) * currentSpeed;
                     }
                     if(keys['KeyS']) {
-                        this.vx = -Math.cos(this.angle) * speed * 0.6;
-                        this.vy = -Math.sin(this.angle) * speed * 0.6;
-                        isMoving = true;
+                        vx = -Math.cos(this.angle) * (currentSpeed * 0.6);
+                        vy = -Math.sin(this.angle) * (currentSpeed * 0.6);
                     }
                     if(keys['Space'] && this.cooldown <= 0) this.fire();
                 }
 
-                // Apply Movement with Wall Sliding
-                this.moveWithCollision(this.vx, this.vy);
+                // --- SMOOTH WALL COLLISION (SLIDING) ---
+                this.x += vx;
+                this.handleWallCollision('x');
+                this.y += vy;
+                this.handleWallCollision('y');
 
-                // Tracks logic
-                if(isMoving && Math.random() < 0.3) {
-                    tracks.push({
-                        x: this.x, y: this.y, angle: this.angle, life: 100, maxLife: 100
-                    });
-                }
+                // Keep inside screen
+                this.x = Math.max(this.radius, Math.min(width - this.radius, this.x));
+                this.y = Math.max(this.radius, Math.min(height - this.radius, this.y));
 
                 if(this.cooldown > 0) this.cooldown--;
             }
 
-            moveWithCollision(vx, vy) {
-                // Move X
-                this.x += vx;
-                if(this.checkWallCollision()) {
-                    this.x -= vx; // Undo X if hit
-                }
-                // Move Y
-                this.y += vy;
-                if(this.checkWallCollision()) {
-                    this.y -= vy; // Undo Y if hit
-                }
-            }
-
-            checkWallCollision() {
+            handleWallCollision(axis) {
                 for(let w of walls) {
-                    // Circle-AABB collision
+                    // Find closest point on rectangle to the tank circle
                     let testX = this.x;
                     let testY = this.y;
 
@@ -360,22 +295,31 @@
 
                     let distX = this.x - testX;
                     let distY = this.y - testY;
-                    let distance = Math.sqrt((distX*distX) + (distY*distY));
+                    let distance = Math.hypot(distX, distY);
 
-                    if(distance <= this.r) return true;
+                    if(distance < this.radius) {
+                        // Push out smoothly
+                        let overlap = this.radius - distance;
+                        if(distance > 0) {
+                            if(axis === 'x') this.x += (distX / distance) * overlap;
+                            if(axis === 'y') this.y += (distY / distance) * overlap;
+                        }
+                    }
                 }
-                return false;
             }
 
             fire() {
-                let damage = this.godMode ? 35 : 15;
-                let bx = this.x + Math.cos(this.angle) * (this.r + 15);
-                let by = this.y + Math.sin(this.angle) * (this.r + 15);
-                bullets.push(new Bullet(bx, by, this.angle, this.id, this.color, damage));
-                this.cooldown = this.godMode ? 12 : this.maxCooldown;
+                // God mode makes bullets extremely powerful and fast shooting!
+                let dmg = this.godMode ? 40 : 15; 
+                let bSpeed = this.godMode ? 18 : 12;
                 
-                // Fire effect
-                createParticles(bx, by, this.color, 5, 2);
+                let bx = this.x + Math.cos(this.angle) * (this.radius + 10);
+                let by = this.y + Math.sin(this.angle) * (this.radius + 10);
+                
+                bullets.push(new Bullet(bx, by, this.angle, this.id, this.color, dmg, bSpeed));
+                
+                this.cooldown = this.godMode ? 10 : 25; // Faster reload in God Mode
+                createParticles(bx, by, '#ffcc00', 8, 3); // Muzzle flash
             }
 
             draw() {
@@ -385,33 +329,23 @@
                 ctx.translate(this.x, this.y);
                 ctx.rotate(this.angle);
 
-                // Base shadow
-                ctx.shadowColor = 'rgba(0,0,0,0.8)';
-                ctx.shadowBlur = 10;
-                ctx.shadowOffsetX = 5;
-                ctx.shadowOffsetY = 5;
-
                 // Body
                 ctx.fillStyle = this.color;
-                ctx.fillRect(-this.r, -this.r + 4, this.r * 2, this.r * 2 - 8);
+                ctx.fillRect(-this.radius, -this.radius + 4, this.radius*2, this.radius*2 - 8);
                 
-                // Details (Neon glow)
-                ctx.shadowBlur = this.godMode ? 20 : 0; // Secret subtle glow in god mode
-                ctx.shadowColor = this.color;
-                
-                // Treads
+                // Tracks
                 ctx.fillStyle = '#222';
-                ctx.fillRect(-this.r - 2, -this.r, this.r * 2 + 4, 6);
-                ctx.fillRect(-this.r - 2, this.r - 6, this.r * 2 + 4, 6);
-                
-                // Gun Barrel
-                ctx.fillStyle = '#555';
-                ctx.fillRect(0, -3, this.r + 20, 6);
+                ctx.fillRect(-this.radius - 2, -this.radius, this.radius*2 + 4, 6);
+                ctx.fillRect(-this.radius - 2, this.radius - 6, this.radius*2 + 4, 6);
+
+                // Gun
+                ctx.fillStyle = '#64748b';
+                ctx.fillRect(0, -3, this.radius + 18, 6);
 
                 // Turret center
                 ctx.beginPath();
-                ctx.arc(0, 0, this.r/1.5, 0, Math.PI*2);
-                ctx.fillStyle = '#111';
+                ctx.arc(0, 0, this.radius * 0.6, 0, Math.PI * 2);
+                ctx.fillStyle = '#0f172a';
                 ctx.fill();
                 ctx.lineWidth = 2;
                 ctx.strokeStyle = this.color;
@@ -419,92 +353,60 @@
 
                 ctx.restore();
 
-                // HP Bar
-                ctx.fillStyle = 'rgba(255,0,0,0.7)';
-                ctx.fillRect(this.x - 20, this.y - 30, 40, 4);
-                ctx.fillStyle = 'rgba(0,255,100,0.9)';
-                ctx.fillRect(this.x - 20, this.y - 30, 40 * (Math.max(0, this.hp) / this.maxHp), 4);
+                // Health Bar
+                ctx.fillStyle = 'rgba(255, 0, 0, 0.7)';
+                ctx.fillRect(this.x - 25, this.y - 35, 50, 5);
+                ctx.fillStyle = '#22c55e';
+                ctx.fillRect(this.x - 25, this.y - 35, 50 * (Math.max(0, this.hp) / this.maxHp), 5);
             }
         }
 
         class Bullet {
-            constructor(x, y, angle, ownerId, color, damage) {
+            constructor(x, y, angle, ownerId, color, damage, speed) {
                 this.x = x;
                 this.y = y;
-                this.r = 4;
-                this.speed = 12;
-                this.vx = Math.cos(angle) * this.speed;
-                this.vy = Math.sin(angle) * this.speed;
+                this.radius = 5;
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed;
                 this.ownerId = ownerId;
                 this.color = color;
                 this.damage = damage;
-                this.bounces = 1; // Advanced feature: Bullet bounces once!
                 this.active = true;
             }
 
             update() {
-                // Move
                 this.x += this.vx;
                 this.y += this.vy;
 
-                // Trail
-                if(Math.random() < 0.5) {
-                    particles.push(new Particle(this.x, this.y, this.color, Math.random()*2, 0.5, 15));
+                // Trail effect
+                if(Math.random() < 0.4) {
+                    particles.push(new Particle(this.x, this.y, this.color, 1, 2, 10));
                 }
 
                 // Wall Collision
                 for(let w of walls) {
-                    let testX = this.x;
-                    let testY = this.y;
-                    
-                    if(this.x < w.x) testX = w.x; else if(this.x > w.x + w.w) testX = w.x + w.w;
-                    if(this.y < w.y) testY = w.y; else if(this.y > w.y + w.h) testY = w.y + w.h;
-
-                    let distX = this.x - testX;
-                    let distY = this.y - testY;
-                    let distance = Math.sqrt((distX*distX) + (distY*distY));
-
-                    if(distance <= this.r) {
-                        if(this.bounces > 0) {
-                            this.bounces--;
-                            createParticles(this.x, this.y, '#fff', 8, 2);
-                            
-                            // Determine bounce direction
-                            if(Math.abs(distX) > Math.abs(distY)) {
-                                this.vx *= -1; // Bounce horizontally
-                            } else {
-                                this.vy *= -1; // Bounce vertically
-                            }
-                            // Push out of wall a bit
-                            this.x += this.vx;
-                            this.y += this.vy;
-                        } else {
-                            this.active = false;
-                            createParticles(this.x, this.y, this.color, 10, 3);
-                        }
+                    if(this.x > w.x && this.x < w.x + w.w && this.y > w.y && this.y < w.y + w.h) {
+                        this.active = false;
+                        createParticles(this.x, this.y, '#94a3b8', 10, 4); // Wall hit sparks
                         break;
                     }
                 }
 
-                // Bounds
-                if(this.x < 0 || this.x > GAME_WIDTH || this.y < 0 || this.y > GAME_HEIGHT) this.active = false;
+                if(this.x < 0 || this.x > width || this.y < 0 || this.y > height) this.active = false;
             }
 
             draw() {
                 ctx.beginPath();
-                ctx.arc(this.x, this.y, this.r, 0, Math.PI*2);
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
                 ctx.fillStyle = '#fff';
                 ctx.fill();
+                
                 ctx.shadowBlur = 10;
                 ctx.shadowColor = this.color;
-                ctx.closePath();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = this.color;
+                ctx.stroke();
                 ctx.shadowBlur = 0;
-                
-                // Inner core
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.r-2, 0, Math.PI*2);
-                ctx.fillStyle = this.color;
-                ctx.fill();
             }
         }
 
@@ -516,7 +418,7 @@
                 let vel = Math.random() * speed;
                 this.vx = Math.cos(angle) * vel;
                 this.vy = Math.sin(angle) * vel;
-                this.size = Math.random() * size + 1;
+                this.size = Math.random() * size + 2;
                 this.life = life;
                 this.maxLife = life;
             }
@@ -541,144 +443,107 @@
             }
         }
 
-        // --- Core Logic ---
-        function startGame(players) {
-            document.getElementById('mainMenu').style.display = 'none';
+        function startGame(numPlayers) {
+            document.getElementById('startPanel').style.display = 'none';
             tanks = [];
             bullets = [];
             particles = [];
-            tracks = [];
             
-            // Safe spawn points in the maze
-            tanks.push(new Tank(1, 150, 150, '#00f3ff', 'mouse')); // Blue top-left
-            tanks.push(new Tank(2, GAME_WIDTH - 150, GAME_HEIGHT - 150, '#ff0055', 'arrows')); // Red bottom-right
+            // Safe spawn points in corners
+            tanks.push(new Tank(1, 100, 100, '#38bdf8', 'mouse')); // P1: Top-Left (Blue)
+            tanks.push(new Tank(2, width - 100, height - 100, '#f43f5e', 'arrows')); // P2: Bottom-Right (Red)
             
-            if(players === 3) {
-                tanks.push(new Tank(3, GAME_WIDTH/2, 150, '#00ff66', 'wasd')); // Green top-center
+            if(numPlayers === 3) {
+                tanks.push(new Tank(3, width/2, height - 100, '#22c55e', 'wasd')); // P3: Bottom-Center (Green)
             }
 
             gameActive = true;
-            gameLoop();
+            requestAnimationFrame(gameLoop);
         }
 
-        function checkTankHits() {
-            for(let b of bullets) {
-                if(!b.active) continue;
-                for(let t of tanks) {
-                    if(t.dead || b.ownerId === t.id) continue;
+        function checkHits() {
+            bullets.forEach(b => {
+                if(!b.active) return;
+                tanks.forEach(t => {
+                    if(t.dead || b.ownerId === t.id) return;
                     
                     let dist = Math.hypot(b.x - t.x, b.y - t.y);
-                    if(dist < t.r + b.r) {
+                    if(dist < t.radius + b.radius) {
                         b.active = false;
-                        createParticles(b.x, b.y, '#ffaa00', 15, 4);
+                        createParticles(b.x, b.y, '#fbbf24', 15, 5);
 
-                        // GOD MODE Defense Logic
-                        let dmg = t.godMode ? 1 : b.damage; // Takes only 1 damage! 🤫
-                        t.hp -= dmg;
+                        // --- GOD MODE SECRET DEFENSE ---
+                        // Takes almost NO damage if God Mode is on!
+                        let actualDamage = t.godMode ? 2 : b.damage; 
+                        t.hp -= actualDamage;
 
                         if(t.hp <= 0) {
                             t.hp = 0;
                             t.dead = true;
-                            createParticles(t.x, t.y, t.color, 50, 8);
+                            createParticles(t.x, t.y, t.color, 40, 8); // Huge explosion
                             createParticles(t.x, t.y, '#fff', 20, 10);
-                            screenShakeTime = 15; // BIG BOOM shake
                         }
                     }
-                }
-            }
+                });
+            });
         }
 
-        function checkWin() {
-            let alive = tanks.filter(t => !t.dead);
-            if(alive.length <= 1 && tanks.length > 0) {
+        function checkWinCondition() {
+            let aliveTanks = tanks.filter(t => !t.dead);
+            if(aliveTanks.length <= 1 && tanks.length > 0) {
                 gameActive = false;
                 setTimeout(() => {
-                    let box = document.getElementById('gameOverBox');
-                    let text = document.getElementById('winnerText');
-                    box.style.display = 'block';
-                    if(alive.length === 1) {
-                        text.innerText = `Player ${alive[0].id} Wins!`;
-                        text.style.color = alive[0].color;
+                    document.getElementById('gameOverPanel').style.display = 'block';
+                    let wText = document.getElementById('winnerText');
+                    if(aliveTanks.length === 1) {
+                        wText.innerText = `Player ${aliveTanks[0].id} Wins!`;
+                        wText.style.color = aliveTanks[0].color;
                     } else {
-                        text.innerText = `Draw!`;
-                        text.style.color = '#fff';
+                        wText.innerText = "Match Draw!";
+                        wText.style.color = "#fff";
                     }
                 }, 1000);
             }
         }
 
-        function renderMaze() {
-            ctx.fillStyle = '#0f1423';
-            ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
-
-            // Draw grid pattern on floor
-            ctx.strokeStyle = 'rgba(0, 243, 255, 0.05)';
+        function drawArena() {
+            ctx.clearRect(0, 0, width, height);
+            
+            // Grid background
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
             ctx.lineWidth = 1;
-            for(let x=0; x<GAME_WIDTH; x+=50) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,GAME_HEIGHT); ctx.stroke(); }
-            for(let y=0; y<GAME_HEIGHT; y+=50) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(GAME_WIDTH,y); ctx.stroke(); }
+            for(let i=0; i<width; i+=60) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,height); ctx.stroke(); }
+            for(let i=0; i<height; i+=60) { ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(width,i); ctx.stroke(); }
 
-            // Draw tracks
-            tracks.forEach(tr => {
-                ctx.save();
-                ctx.translate(tr.x, tr.y);
-                ctx.rotate(tr.angle);
-                ctx.fillStyle = `rgba(0,0,0,${(tr.life/tr.maxLife) * 0.5})`;
-                ctx.fillRect(-12, -15, 24, 5);
-                ctx.fillRect(-12, 10, 24, 5);
-                ctx.restore();
-                tr.life--;
-            });
-            tracks = tracks.filter(t => t.life > 0);
-
-            // Draw Walls with Neon edges
-            for(let w of walls) {
-                // Shadow / Glow
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = '#000';
-                
-                // Base Wall
-                ctx.fillStyle = '#1a1f35';
+            // Draw Walls
+            walls.forEach(w => {
+                ctx.fillStyle = '#1e293b';
                 ctx.fillRect(w.x, w.y, w.w, w.h);
-                
-                // Border/Neon Edge
-                ctx.shadowBlur = 0;
-                ctx.strokeStyle = '#2a3350';
-                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#475569';
+                ctx.lineWidth = 3;
                 ctx.strokeRect(w.x, w.y, w.w, w.h);
                 
-                // Highlight
-                ctx.fillStyle = 'rgba(255,255,255,0.05)';
+                // Neon glow line on top edge
+                ctx.fillStyle = '#64748b';
                 ctx.fillRect(w.x, w.y, w.w, 4);
-                ctx.fillRect(w.x, w.y, 4, w.h);
-            }
+            });
         }
 
         function gameLoop() {
             if(!gameActive) return;
 
-            // Screen Shake Logic
-            ctx.save();
-            ctx.scale(scaleX, scaleY);
-            if(screenShakeTime > 0) {
-                let dx = (Math.random() - 0.5) * 10;
-                let dy = (Math.random() - 0.5) * 10;
-                ctx.translate(dx, dy);
-                screenShakeTime--;
-            }
-
-            renderMaze();
+            drawArena();
 
             tanks.forEach(t => { t.update(); t.draw(); });
             bullets.forEach(b => { b.update(); b.draw(); });
             particles.forEach(p => { p.update(); p.draw(); });
 
+            // Clean up
             bullets = bullets.filter(b => b.active);
             particles = particles.filter(p => p.life > 0);
 
-            checkTankHits();
-            ctx.restore(); // Restore before checking win (UI stuff)
-            
-            checkWin();
+            checkHits();
+            checkWinCondition();
 
             requestAnimationFrame(gameLoop);
         }
