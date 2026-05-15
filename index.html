@@ -1,30 +1,39 @@
-```html
 <!DOCTYPE html>
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🔥 Utsav OS 2.0 - The Power 🥰</title>
-    <!-- Tailwind CSS -->
+    <title>🔥 Utsav OS - The Power 🥰</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Canvas Confetti -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     
+    <!-- ⚡ SUPER FAST SECRET CHECK (लोड होने से पहले ही चेक करेगा) ⚡ -->
+    <script>
+        if(localStorage.getItem('utsavSecretAppUnlocked') === 'true') {
+            document.documentElement.classList.add('direct-secret-mode');
+        }
+    </script>
+
     <style>
-        :root {
-            --glass-bg: rgba(15, 20, 30, 0.45);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --icon-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.6);
+        /* 🚀 Direct Secret Mode Magic - Hides everything instantly */
+        html.direct-secret-mode body > *:not(#secret-app-container) {
+            display: none !important;
+        }
+        html.direct-secret-mode #secret-app-container {
+            display: block !important;
+            opacity: 1 !important;
+            z-index: 999999 !important;
         }
 
         body {
-            font-family: 'Outfit', sans-serif;
-            margin: 0; overflow: hidden;
-            height: 100vh; width: 100vw;
-            user-select: none; color: white;
-            /* मस्त वाला एनिमेटेड बैकग्राउंड */
+            margin: 0; padding: 0; overflow: hidden;
+            background: #0f172a; 
+            user-select: none; -webkit-user-select: none;
+            font-family: system-ui, -apple-system, sans-serif;
+            touch-action: manipulation;
+        }
+
+        /* 🌌 Premium Background */
+        .bg-gradient-os {
             background: radial-gradient(circle at top right, #1e1b4b, #0f172a, #064e3b, #312e81);
             background-size: 300% 300%;
             animation: gradientMove 20s ease infinite;
@@ -36,439 +45,354 @@
             100% { background-position: 0% 0%; }
         }
 
-        /* 🖼️ Secret GIF Wallpaper */
-        body.gif-wallpaper {
-            background-image: url('https://s13.gifyu.com/images/bmzDJ.gif') !important;
-            background-size: cover !important;
-            background-position: center !important;
-            animation: none !important;
+        /* 🔮 Glassmorphism */
+        .glass-panel {
+            background: rgba(15, 20, 30, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
 
-        /* 🚀 Fast Boot Screen */
-        #boot-screen {
-            position: fixed; inset: 0;
-            background: #050505; z-index: 10000;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        /* 🍏 Apps Grid (तुम्हारे पुराने वाले मस्त ऐप्स) */
+        .app-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem 0.5rem;
+            padding: 1rem;
         }
 
+        .app-icon-wrapper {
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+            cursor: pointer; text-decoration: none;
+            animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+        }
+
+        .mac-icon {
+            width: 60px; height: 60px;
+            border-radius: 18px; 
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.6), inset 0 2px 3px rgba(255,255,255,0.4);
+            border: 1px solid rgba(255,255,255,0.15);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .app-icon-wrapper:hover .mac-icon {
+            transform: translateY(-5px) scale(1.1);
+            box-shadow: 0 15px 25px -5px rgba(0,0,0,0.7);
+        }
+        .app-icon-wrapper:active .mac-icon {
+            transform: scale(0.9);
+        }
+
+        .mac-icon svg {
+            width: 32px; height: 32px; color: white;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+        }
+
+        .app-title {
+            font-size: 0.75rem; font-weight: 600; text-align: center;
+            color: #f1f1f1; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.3); padding: 2px 8px; rounded: 10px;
+            border-radius: 8px;
+        }
+
+        /* Loading Ring */
         .loader-ring {
-            width: 80px; height: 80px;
+            width: 60px; height: 60px;
             border: 4px solid rgba(255,255,255,0.1);
             border-top-color: #00e5ff;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-
         @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        /* 📱 Portrait Warning */
-        #portrait-warning {
-            display: none; position: fixed; inset: 0;
-            background: rgba(0,0,0,0.95); z-index: 9999;
-            flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; backdrop-filter: blur(20px);
-        }
-        @media screen and (orientation: portrait) { #portrait-warning { display: flex; } }
-
-        /* 💻 Desktop Grid System */
-        #desktop {
-            padding: 40px;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 30px 20px;
-            align-content: start;
-            height: calc(100vh - 65px); /* Taskbar की जगह छोड़ी */
-            position: relative; z-index: 10;
-        }
-
-        /* 🍏 Advanced App Icons with Physics (Spring Effect) */
-        .app-icon-wrapper {
-            display: flex; flex-direction: column; align-items: center; gap: 10px;
-            cursor: pointer; text-decoration: none; outline: none;
-            /* पॉप-इन एनीमेशन शुरुआत के लिए */
-            animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
-        }
-
-        .mac-icon {
-            width: 70px; height: 70px;
-            border-radius: 20px; /* Apple style squircle */
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: var(--icon-shadow), inset 0 2px 3px rgba(255,255,255,0.4);
-            border: 1px solid rgba(255,255,255,0.15);
-            /* Physics: बाउंस वाला स्मूथ इफ़ेक्ट */
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative; overflow: hidden;
-            background-size: cover;
-        }
-
-        .mac-icon::after {
-            content: ''; position: absolute; inset: 0;
-            background: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 50%);
-            border-radius: 20px; pointer-events: none;
-        }
-
-        /* Hover & Active Physics */
-        .app-icon-wrapper:hover .mac-icon {
-            transform: translateY(-8px) scale(1.1);
-            box-shadow: 0 20px 30px -10px rgba(0,0,0,0.7), inset 0 2px 4px rgba(255,255,255,0.6);
-            border-color: rgba(255,255,255,0.4);
-        }
-        .app-icon-wrapper:active .mac-icon {
-            transform: scale(0.9);
-            transition: all 0.1s; /* दबाते ही तुरंत छोटा हो */
-        }
-
-        .mac-icon svg {
-            width: 38px; height: 38px; color: white;
-            filter: drop-shadow(0 3px 5px rgba(0,0,0,0.5)); z-index: 2;
-            transition: transform 0.3s;
-        }
-        .app-icon-wrapper:hover .mac-icon svg {
-            transform: scale(1.1);
-        }
-
-        .app-title {
-            font-size: 0.85rem; font-weight: 600; text-align: center;
-            text-shadow: 1px 2px 4px rgba(0,0,0,1); letter-spacing: 0.5px;
-            color: #f1f1f1; background: rgba(0,0,0,0.4);
-            padding: 4px 12px; border-radius: 12px;
-            backdrop-filter: blur(5px); border: 1px solid transparent;
-            transition: all 0.3s;
-        }
-
-        .app-icon-wrapper:hover .app-title {
-            background: rgba(255,255,255,0.15);
-            border-color: rgba(255,255,255,0.3);
-            color: white; transform: translateY(-2px);
-        }
-
-        /* 🎛️ Modern Floating Taskbar */
-        #taskbar {
-            position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%);
-            height: 55px; padding: 0 20px;
-            display: flex; align-items: center; justify-content: space-between; gap: 30px;
-            background: rgba(10, 15, 25, 0.7); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(255,255,255,0.1); border-radius: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 1000;
-        }
-
-        .start-btn {
-            width: 40px; height: 40px; border-radius: 50%;
-            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
-            display: flex; justify-content: center; align-items: center;
-            box-shadow: 0 0 15px rgba(79, 172, 254, 0.6);
-            cursor: pointer; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .start-btn:hover { transform: rotate(180deg) scale(1.1); box-shadow: 0 0 25px rgba(79, 172, 254, 0.9); }
-
-        /* Custom Context Menu */
-        #context-menu {
-            display: none; position: absolute; z-index: 10000;
-            width: 200px; background: rgba(20, 25, 35, 0.85);
-            backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 12px; padding: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-            animation: fadeIn 0.2s ease;
-        }
-        .menu-item {
-            padding: 10px 12px; border-radius: 8px; cursor: pointer;
-            font-size: 0.9rem; display: flex; align-items: center; gap: 10px;
-            transition: all 0.2s; color: #ddd;
-        }
-        .menu-item:hover { background: rgba(255, 255, 255, 0.1); color: #fff; transform: translateX(5px);}
-
-        /* Animations */
         @keyframes popIn {
-            0% { opacity: 0; transform: scale(0.3) translateY(40px); }
-            80% { transform: scale(1.05) translateY(-5px); }
+            0% { opacity: 0; transform: scale(0.5) translateY(20px); }
             100% { opacity: 1; transform: scale(1) translateY(0); }
         }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-
     </style>
 </head>
-<body oncontextmenu="return false;"> <!-- Right click default roko -->
+<body class="text-white h-screen w-screen overflow-hidden">
 
-    <!-- 🚀 Boot Screen -->
-    <div id="boot-screen">
+    <!-- 🌟 1. SECRET APP (IFRAME) - 0.001s Loading -->
+    <div id="secret-app-container" class="hidden absolute inset-0 z-[999999] bg-black">
+        <iframe src="https://testwallah.github.io/time" class="w-full h-full border-none" title="Secret App"></iframe>
+    </div>
+
+    <!-- 🚀 2. BOOT SCREEN -->
+    <div id="boot-screen" class="absolute inset-0 z-50 bg-[#050505] flex flex-col items-center justify-center transition-opacity duration-500">
+        
+        <!-- 🤫 HIDDEN SECRET BUTTON (Top Left - बहुत बड़ा और गायब) -->
+        <div id="secret-trigger" class="absolute top-0 left-0 w-32 h-32 bg-transparent z-[100] cursor-pointer"></div>
+
         <div class="loader-ring mb-6"></div>
-        <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 tracking-widest">UTSAV OS 2.0</h2>
-        <p class="text-gray-400 mt-2 text-sm">Powering Up Engines...</p>
-    </div>
-
-    <!-- 📱 Portrait Warning -->
-    <div id="portrait-warning">
-        <svg class="w-24 h-24 text-cyan-400 mb-6 animate-[spin_3s_linear_infinite]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-        <h1 class="text-4xl font-black text-white mb-3">Rotate Device</h1>
-        <p class="text-xl text-gray-300 font-semibold">मज़ा लैंडस्केप में है! 🔄</p>
-    </div>
-
-    <!-- 💻 Custom Context Menu -->
-    <div id="context-menu">
-        <div class="menu-item" onclick="triggerRefresh()">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-            Refresh Screen
-        </div>
-        <div class="menu-item" onclick="toggleFullScreen()">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
-            Full Screen
-        </div>
-        <div class="h-[1px] bg-white/10 my-2"></div>
-        <div class="menu-item text-xs text-gray-400 pointer-events-none">
-            🎨 Alt+G : GIF Wallpaper<br>🌌 Alt+S : Color Wall
-        </div>
-    </div>
-
-    <!-- 📱 Desktop Grid (Apps) -->
-    <div id="desktop">
+        <h2 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 tracking-widest drop-shadow-[0_0_15px_rgba(0,229,255,0.5)]">UTSAV OS</h2>
+        <p class="text-gray-400 mt-3 text-sm font-medium tracking-wider" id="boot-status">Powering Up Engines...</p>
         
-        <!-- 🏹 1. Tir Dhal Game (NEW) -->
-        <a href="t.html" target="_blank" class="app-icon-wrapper" style="animation-delay: 0.05s" onmouseenter="playHover()" onclick="playClick(event)">
-            <div class="mac-icon bg-gradient-to-br from-yellow-500 to-orange-700">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-            </div>
-            <span class="app-title">Tir Dhal 1v1</span>
-        </a>
-
-        <!-- 💥 2. Tank Game (NEW) -->
-        <a href="l.html" target="_blank" class="app-icon-wrapper" style="animation-delay: 0.1s" onmouseenter="playHover()" onclick="playClick(event)">
-            <div class="mac-icon bg-gradient-to-br from-green-600 to-emerald-900">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 14h20v4H2v-4zm4-6h12v4H6V8zm4-4h4v2h-4V4z"/></svg>
-            </div>
-            <span class="app-title">Tank Arena</span>
-        </a>
-
-        <!-- 🦅 3. Flappy Bird (NEW) -->
-        <a href="f.html" target="_blank" class="app-icon-wrapper" style="animation-delay: 0.15s" onmouseenter="playHover()" onclick="playClick(event)">
-            <div class="mac-icon bg-gradient-to-br from-cyan-400 to-blue-600">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c-5.5 0-10 4.5-10 10s4.5 10 10 10 10-4.5 10-10-4.5-10-10-10zm0 4c2.2 0 4 1.8 4 4 0 .6-.1 1.1-.4 1.6l-5.2-5.2c.5-.3 1-.4 1.6-.4zm-4 4c0-2.2 1.8-4 4-4 .6 0 1.1.1 1.6.4l-5.2 5.2c-.3-.5-.4-1-.4-1.6zm8.8 3.2l-1.6 1.6-1.6-1.6 1.6-1.6 1.6 1.6z"/></svg>
-            </div>
-            <span class="app-title">Flappy Bird</span>
-        </a>
-
-        <!-- ⚽ 4. Football Game (NEW) -->
-        <a href="g.html" target="_blank" class="app-icon-wrapper" style="animation-delay: 0.2s" onmouseenter="playHover()" onclick="playClick(event)">
-            <div class="mac-icon bg-gradient-to-br from-green-400 to-green-700">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
-            </div>
-            <span class="app-title">Football 1v1</span>
-        </a>
-
-        <!-- 🎈 5. Baloon Game -->
-        <a href="bln.html" target="_blank" class="app-icon-wrapper" style="animation-delay: 0.25s" onmouseenter="playHover()" onclick="playClick(event)">
-            <div class="mac-icon bg-gradient-to-br from-red-500 to-rose-700">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C9.5 2 7.5 4.5 7.5 8C7.5 11.5 10.5 15 12 17C13.5 15 16.5 11.5 16.5 8C16.5 4.5 14.5 2 12 2ZM11.5 18H12.5L13 22H11L11.5 18Z"/></svg>
-            </div>
-            <span class="app-title">Baloon Blast</span>
-        </a>
-
-        <!-- 🤖 6. MK Game -->
-        <a href="cyb.html" target="_blank" class="app-icon-wrapper" style="animation-delay: 0.3s" onmouseenter="playHover()" onclick="playClick(event)">
-            <div class="mac-icon bg-gradient-to-br from-indigo-500 to-purple-800">
-                <svg viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="2" width="14" height="20" rx="7"/><line x1="12" y1="8" x2="12" y2="12" stroke="white" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="6" r="1" fill="white"/></svg>
-            </div>
-            <span class="app-title">MK Game</span>
-        </a>
-
-        <!-- ⌨️ 7. KeyMAP -->
-        <a href="info.html" target="_blank" class="app-icon-wrapper" style="animation-delay: 0.35s" onmouseenter="playHover()" onclick="playClick(event)">
-            <div class="mac-icon bg-gradient-to-br from-gray-700 to-black">
-                <svg viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="6" width="20" height="12" rx="2"/><rect x="4" y="8" width="2" height="2" fill="white" opacity="0.8" rx="0.5"/><rect x="8" y="8" width="2" height="2" fill="white" opacity="0.8" rx="0.5"/><rect x="12" y="8" width="2" height="2" fill="white" opacity="0.8" rx="0.5"/><rect x="16" y="8" width="2" height="2" fill="white" opacity="0.8" rx="0.5"/><rect x="6" y="12" width="12" height="2" fill="white" opacity="0.8" rx="0.5"/></svg>
-            </div>
-            <span class="app-title">KeyMAP</span>
-        </a>
-
-        <!-- 📖 8. Passage -->
-        <a href="para.html" target="_blank" class="app-icon-wrapper" style="animation-delay: 0.4s" onmouseenter="playHover()" onclick="playClick(event)">
-            <div class="mac-icon bg-gradient-to-br from-fuchsia-500 to-pink-700">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 2C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V4C20 2.89543 19.1046 2 18 2H6ZM8 6H16V8H8V6ZM8 10H16V12H8V10ZM8 14H13V16H8V14Z"/></svg>
-            </div>
-            <span class="app-title">Passage</span>
-        </a>
-
-        <!-- 🔠 9. Words Type -->
-        <a href="type.html" target="_blank" class="app-icon-wrapper" style="animation-delay: 0.45s" onmouseenter="playHover()" onclick="playClick(event)">
-            <div class="mac-icon bg-gradient-to-br from-orange-400 to-red-600">
-                <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="4"/><text x="12" y="17" font-size="14" font-weight="bold" fill="white" text-anchor="middle" font-family="sans-serif">T</text></svg>
-            </div>
-            <span class="app-title">Words Type</span>
-        </a>
-
-        <!-- 🧟 10. ZomGame -->
-        <a href="zom.html" target="_blank" class="app-icon-wrapper" style="animation-delay: 0.5s" onmouseenter="playHover()" onclick="playClick(event)">
-            <div class="mac-icon bg-gradient-to-br from-emerald-400 to-teal-800">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.134 2 5 5.134 5 9V19.5C5 20.88 6.119 22 7.5 22C8.161 22 8.762 21.74 9.207 21.32L10.38 20.15C11.26 19.27 12.68 19.27 13.56 20.15L14.73 21.32C15.18 21.74 15.78 22 16.44 22C17.82 22 18.94 20.88 18.94 19.5V9C18.94 5.134 15.81 2 11.94 2H12ZM9 8C9.552 8 10 8.448 10 9C10 9.552 9.552 10 9 10C8.448 10 8 9.552 8 9C8 8.448 8.448 8 9 8ZM15 8C15.55 8 16 8.448 16 9C16 9.552 15.55 10 15 10C14.45 10 14 9.552 14 9C14 8.448 14.45 8 15 8ZM10.5 14H13.5V16H10.5V14Z"/></svg>
-            </div>
-            <span class="app-title">ZomGame</span>
-        </a>
-
+        <button id="enter-os-btn" class="hidden mt-8 px-8 py-3 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-lg shadow-[0_0_20px_rgba(0,229,255,0.4)] transition-all transform hover:scale-105 active:scale-95">
+            Enter OS
+        </button>
     </div>
 
-    <!-- 🎛️ Floating Taskbar -->
-    <div id="taskbar">
-        <div class="flex items-center gap-4">
-            <!-- Start Button (with Confetti + Sound) -->
-            <div class="start-btn" onclick="playClick(event); hugeConfetti();" title="Start Menu">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-            </div>
-            <span class="font-extrabold text-lg tracking-[0.2em] text-white hidden sm:block">UTSAV OS 2.0</span>
-        </div>
-
-        <div class="flex items-center gap-3">
-            <button onclick="playClick(event); toggleFullScreen();" class="hover:bg-white/20 p-2 rounded-full transition-all" title="Full Screen">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
-            </button>
-            <!-- Modern Clock -->
-            <div id="clock" class="text-sm font-bold bg-white/10 px-4 py-2 rounded-full border border-white/20 shadow-inner">
-                00:00
+    <!-- 🔐 3. SECRET PIN MODAL -->
+    <div id="pin-modal" class="hidden absolute inset-0 z-[150] bg-black/90 backdrop-blur-md flex items-center justify-center">
+        <div class="glass-panel p-8 rounded-3xl w-80 text-center">
+            <h2 class="text-2xl font-bold mb-6 text-white tracking-wide">Enter PIN</h2>
+            <input type="password" id="pin-input" class="w-full bg-black/50 border-2 border-gray-600 rounded-xl px-4 py-3 text-center text-3xl tracking-[0.5em] text-white focus:outline-none focus:border-cyan-400 transition-colors mb-6" maxlength="4">
+            <div class="flex gap-4">
+                <button id="pin-cancel" class="flex-1 px-4 py-3 rounded-xl bg-gray-800 hover:bg-gray-700 font-medium transition-colors">Cancel</button>
+                <button id="pin-submit" class="flex-1 px-4 py-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 font-bold shadow-lg shadow-cyan-600/30 transition-colors">Unlock</button>
             </div>
         </div>
     </div>
 
-    <script>
-        /* =========================================================
-           🎵 Zero-Lag Sound Engine (Physics of Sound Waves)
-           ========================================================= */
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    <!-- 💻 4. MAIN OS INTERFACE (तुम्हारे सारे ऐप्स के साथ) -->
+    <div id="main-os" class="hidden absolute inset-0 z-30 bg-gradient-os flex flex-col">
         
-        // 🔊 Hover Sound (हल्की सी टिंग)
-        function playHover() {
-            if(audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            osc.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-            gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime); // बहुत धीमी आवाज़
-            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
-            
-            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
-        }
+        <!-- Top Status Bar -->
+        <div class="w-full h-8 px-5 flex justify-between items-center text-xs font-semibold tracking-wider bg-black/20 backdrop-blur-md border-b border-white/5">
+            <div id="os-time-small" class="flex-1">00:00</div>
+            <div class="flex items-center space-x-3">
+                <svg class="w-4 h-4 text-cyan-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3C7.6 3 3.5 4.6.4 7.2l11.6 14.5 11.6-14.5C20.5 4.6 16.4 3 12 3zm0 4.2c3 0 5.8 1.1 8 3l-8 10-8-10c2.2-1.9 5-3 8-3z"/></svg>
+                <div class="flex items-center space-x-1">
+                    <span id="battery-text">100%</span>
+                    <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 24 24"><path d="M16 4h-2V2h-4v2H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-1 16H9V6h6v14z"/></svg>
+                </div>
+            </div>
+        </div>
 
-        // 🖱️ Click Sound (मस्त पॉप साउंड)
-        function playClick(e) {
-            if(audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            osc.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.1);
-            gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
-            
-            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
-            
-            // क्लिक करने पर Confetti भी उड़ेगा
-            if(e) fireConfetti(e);
-        }
+        <!-- Big Clock -->
+        <div class="px-6 pt-8 pb-2 text-center">
+            <div class="text-5xl font-light tracking-tight drop-shadow-lg" id="os-time-large">00:00</div>
+            <div class="text-sm font-medium text-cyan-200 mt-1" id="os-date">Day, Month DD</div>
+        </div>
 
-        // 🚀 Boot Sound (कंप्यूटर चालू होने वाली आवाज़)
-        function playBoot() {
-            if(audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(300, audioCtx.currentTime);
-            osc.frequency.linearRampToValueAtTime(600, audioCtx.currentTime + 0.5);
-            gain.gain.setValueAtTime(0, audioCtx.currentTime);
-            gain.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.2);
-            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.8);
-            
-            osc.start(); osc.stop(audioCtx.currentTime + 0.8);
-        }
-
-        /* =========================================================
-           🚀 System Logic (Boot, Clock, Context Menu)
-           ========================================================= */
-        window.addEventListener('load', () => {
-            // Screen पर पहला क्लिक होते ही Audio Activate हो जाता है (Browser Rules)
-            document.body.addEventListener('click', () => {
-                if(audioCtx.state === 'suspended') audioCtx.resume();
-            }, {once:true});
-
-            setTimeout(() => {
-                const bootScreen = document.getElementById('boot-screen');
-                playBoot(); // बूट साउंड 
-                bootScreen.style.opacity = '0';
-                setTimeout(() => bootScreen.remove(), 600);
+        <!-- 📱 Desktop Grid (तुम्हारे दिए गए सारे ऐप्स) -->
+        <div class="flex-1 overflow-y-auto relative px-2 mt-4 pb-24">
+            <div class="app-grid">
                 
-                // Welcome Confetti
-                confetti({ particleCount: 150, spread: 120, origin: { y: 0.5 }, colors: ['#00e5ff', '#ffffff', '#4facfe'] });
+                <!-- 🏹 1. Tir Dhal -->
+                <a href="t.html" class="app-icon-wrapper" style="animation-delay: 0.05s">
+                    <div class="mac-icon bg-gradient-to-br from-yellow-500 to-orange-700">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </div>
+                    <span class="app-title">Tir Dhal</span>
+                </a>
+
+                <!-- 💥 2. Tank Arena -->
+                <a href="l.html" class="app-icon-wrapper" style="animation-delay: 0.1s">
+                    <div class="mac-icon bg-gradient-to-br from-green-600 to-emerald-900">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 14h20v4H2v-4zm4-6h12v4H6V8zm4-4h4v2h-4V4z"/></svg>
+                    </div>
+                    <span class="app-title">Tank Arena</span>
+                </a>
+
+                <!-- 🦅 3. Flappy Bird -->
+                <a href="f.html" class="app-icon-wrapper" style="animation-delay: 0.15s">
+                    <div class="mac-icon bg-gradient-to-br from-cyan-400 to-blue-600">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c-5.5 0-10 4.5-10 10s4.5 10 10 10 10-4.5 10-10-4.5-10-10-10zm0 4c2.2 0 4 1.8 4 4 0 .6-.1 1.1-.4 1.6l-5.2-5.2c.5-.3 1-.4 1.6-.4zm-4 4c0-2.2 1.8-4 4-4 .6 0 1.1.1 1.6.4l-5.2 5.2c-.3-.5-.4-1-.4-1.6zm8.8 3.2l-1.6 1.6-1.6-1.6 1.6-1.6 1.6 1.6z"/></svg>
+                    </div>
+                    <span class="app-title">Flappy Bird</span>
+                </a>
+
+                <!-- ⚽ 4. Football -->
+                <a href="g.html" class="app-icon-wrapper" style="animation-delay: 0.2s">
+                    <div class="mac-icon bg-gradient-to-br from-green-400 to-green-700">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
+                    </div>
+                    <span class="app-title">Football</span>
+                </a>
+
+                <!-- 🎈 5. Baloon Blast -->
+                <a href="bln.html" class="app-icon-wrapper" style="animation-delay: 0.25s">
+                    <div class="mac-icon bg-gradient-to-br from-red-500 to-rose-700">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C9.5 2 7.5 4.5 7.5 8C7.5 11.5 10.5 15 12 17C13.5 15 16.5 11.5 16.5 8C16.5 4.5 14.5 2 12 2ZM11.5 18H12.5L13 22H11L11.5 18Z"/></svg>
+                    </div>
+                    <span class="app-title">Baloon</span>
+                </a>
+
+                <!-- 🤖 6. MK Game -->
+                <a href="cyb.html" class="app-icon-wrapper" style="animation-delay: 0.3s">
+                    <div class="mac-icon bg-gradient-to-br from-indigo-500 to-purple-800">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="2" width="14" height="20" rx="7"/><line x1="12" y1="8" x2="12" y2="12" stroke="white" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="6" r="1" fill="white"/></svg>
+                    </div>
+                    <span class="app-title">MK Game</span>
+                </a>
+
+                <!-- ⌨️ 7. KeyMAP -->
+                <a href="info.html" class="app-icon-wrapper" style="animation-delay: 0.35s">
+                    <div class="mac-icon bg-gradient-to-br from-gray-700 to-black">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="6" width="20" height="12" rx="2"/><rect x="4" y="8" width="2" height="2" fill="white" opacity="0.8" rx="0.5"/><rect x="8" y="8" width="2" height="2" fill="white" opacity="0.8" rx="0.5"/><rect x="12" y="8" width="2" height="2" fill="white" opacity="0.8" rx="0.5"/><rect x="16" y="8" width="2" height="2" fill="white" opacity="0.8" rx="0.5"/><rect x="6" y="12" width="12" height="2" fill="white" opacity="0.8" rx="0.5"/></svg>
+                    </div>
+                    <span class="app-title">KeyMAP</span>
+                </a>
+
+                <!-- 📖 8. Passage -->
+                <a href="para.html" class="app-icon-wrapper" style="animation-delay: 0.4s">
+                    <div class="mac-icon bg-gradient-to-br from-fuchsia-500 to-pink-700">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 2C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V4C20 2.89543 19.1046 2 18 2H6ZM8 6H16V8H8V6ZM8 10H16V12H8V10ZM8 14H13V16H8V14Z"/></svg>
+                    </div>
+                    <span class="app-title">Passage</span>
+                </a>
+
+                <!-- 🔠 9. Words Type -->
+                <a href="type.html" class="app-icon-wrapper" style="animation-delay: 0.45s">
+                    <div class="mac-icon bg-gradient-to-br from-orange-400 to-red-600">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="4"/><text x="12" y="17" font-size="14" font-weight="bold" fill="white" text-anchor="middle" font-family="sans-serif">T</text></svg>
+                    </div>
+                    <span class="app-title">Words Type</span>
+                </a>
+
+                <!-- 🧟 10. ZomGame -->
+                <a href="zom.html" class="app-icon-wrapper" style="animation-delay: 0.5s">
+                    <div class="mac-icon bg-gradient-to-br from-emerald-400 to-teal-800">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.134 2 5 5.134 5 9V19.5C5 20.88 6.119 22 7.5 22C8.161 22 8.762 21.74 9.207 21.32L10.38 20.15C11.26 19.27 12.68 19.27 13.56 20.15L14.73 21.32C15.18 21.74 15.78 22 16.44 22C17.82 22 18.94 20.88 18.94 19.5V9C18.94 5.134 15.81 2 11.94 2H12ZM9 8C9.552 8 10 8.448 10 9C10 9.552 9.552 10 9 10C8.448 10 8 9.552 8 9C8 8.448 8.448 8 9 8ZM15 8C15.55 8 16 8.448 16 9C16 9.552 15.55 10 15 10C14.45 10 14 9.552 14 9C14 8.448 14.45 8 15 8ZM10.5 14H13.5V16H10.5V14Z"/></svg>
+                    </div>
+                    <span class="app-title">ZomGame</span>
+                </a>
+
+            </div>
+        </div>
+
+        <!-- 🎛️ Floating Bottom Taskbar -->
+        <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 glass-panel px-6 py-3 rounded-full flex items-center justify-center gap-6 w-11/12 max-w-sm z-40">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 flex items-center justify-center shadow-[0_0_15px_rgba(0,229,255,0.5)] cursor-pointer hover:scale-110 transition-transform">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            </div>
+            <div class="text-white font-extrabold tracking-[0.2em] opacity-80">UTSAV OS</div>
+        </div>
+    </div>
+
+    <!-- MAIN JAVASCRIPT LOGIC -->
+    <script>
+        // DOM Elements
+        const bootScreen = document.getElementById('boot-screen');
+        const bootStatus = document.getElementById('boot-status');
+        const enterOsBtn = document.getElementById('enter-os-btn');
+        const mainOs = document.getElementById('main-os');
+        const secretTrigger = document.getElementById('secret-trigger');
+        const pinModal = document.getElementById('pin-modal');
+        const pinInput = document.getElementById('pin-input');
+        const pinSubmit = document.getElementById('pin-submit');
+        const pinCancel = document.getElementById('pin-cancel');
+        const secretAppContainer = document.getElementById('secret-app-container');
+
+        // Check Local Storage (For Normal Load)
+        const isAlreadyUnlocked = localStorage.getItem('utsavSecretAppUnlocked') === 'true';
+
+        window.addEventListener('load', () => {
+            if (isAlreadyUnlocked) {
+                // ⚡ DIRECT FASTEST LOAD EVER ⚡
+                // The CSS rule 'direct-secret-mode' already handled hiding elements,
+                // but we clean them up from DOM for perfect performance.
+                bootScreen.style.display = 'none';
+                mainOs.style.display = 'none';
+                secretAppContainer.classList.remove('hidden');
+                return; // Stop running any other boot code
+            }
+
+            // Normal OS Boot Sequence
+            updateTime();
+            setInterval(updateTime, 1000);
+            updateBattery();
+
+            // 1 Second Fast Boot
+            setTimeout(() => {
+                document.querySelector('.loader-ring').classList.add('hidden');
+                bootStatus.classList.add('hidden');
+                enterOsBtn.classList.remove('hidden');
             }, 1000); 
         });
 
-        // --- 🖼️ HIDDEN WALLPAPER SYSTEM (ALT+G / ALT+S) ---
-        document.addEventListener('keydown', (e) => {
-            if (e.altKey && e.key.toLowerCase() === 'g') {
-                e.preventDefault();
-                document.body.classList.add('gif-wallpaper');
-                playClick();
-            }
-            if (e.altKey && e.key.toLowerCase() === 's') {
-                e.preventDefault();
-                document.body.classList.remove('gif-wallpaper');
-                playClick();
-            }
+        // Enter Normal OS Button
+        enterOsBtn.addEventListener('click', () => {
+            bootScreen.style.opacity = '0';
+            setTimeout(() => {
+                bootScreen.classList.add('hidden');
+                mainOs.classList.remove('hidden');
+            }, 400); 
         });
 
-        // --- 💻 CUSTOM RIGHT CLICK MENU ---
-        const contextMenu = document.getElementById('context-menu');
-        document.addEventListener('contextmenu', (e) => {
-            e.preventDefault(); 
-            contextMenu.style.display = 'block';
-            playHover(); // Menu खुलने पर हलकी आवाज़
-            
-            let x = e.clientX, y = e.clientY;
-            if (x + 200 > window.innerWidth) x = window.innerWidth - 210;
-            if (y + 120 > window.innerHeight) y = window.innerHeight - 130;
-
-            contextMenu.style.left = `${x}px`;
-            contextMenu.style.top = `${y}px`;
+        // 🤫 SECRET FEATURE LOGIC (Top Left Hidden Button)
+        secretTrigger.addEventListener('click', () => {
+            pinModal.classList.remove('hidden');
+            pinInput.value = '';
+            pinInput.focus();
         });
-        document.addEventListener('click', () => contextMenu.style.display = 'none');
 
-        function triggerRefresh() { playClick(); setTimeout(()=>window.location.reload(), 200); }
+        pinCancel.addEventListener('click', () => {
+            pinModal.classList.add('hidden');
+        });
 
-        function toggleFullScreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen();
-            } else if (document.exitFullscreen) {
-                document.exitFullscreen();
+        // 💾 Verify PIN & Save Forever
+        const verifyPin = () => {
+            if (pinInput.value === '2009') {
+                // ✨ MAGIC HAPPENS HERE ✨
+                localStorage.setItem('utsavSecretAppUnlocked', 'true');
+                
+                pinModal.classList.add('hidden');
+                bootScreen.classList.add('hidden');
+                mainOs.classList.add('hidden');
+                
+                // Show iframe instantly
+                secretAppContainer.classList.remove('hidden');
+                
+                // Also add class just to be safe
+                document.documentElement.classList.add('direct-secret-mode');
+            } else {
+                pinInput.classList.add('border-red-500');
+                pinInput.style.transform = 'translateX(-10px)';
+                setTimeout(() => pinInput.style.transform = 'translateX(10px)', 50);
+                setTimeout(() => pinInput.style.transform = 'translateX(0)', 100);
+                setTimeout(() => pinInput.classList.remove('border-red-500'), 500);
+                pinInput.value = '';
             }
-        }
+        };
 
-        // --- 🎉 CONFETTI ---
-        function fireConfetti(event) {
-            const x = event.clientX / window.innerWidth;
-            const y = event.clientY / window.innerHeight;
-            confetti({ particleCount: 40, spread: 50, origin: { x, y }, zIndex: 9999 });
-        }
+        pinSubmit.addEventListener('click', verifyPin);
+        pinInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') verifyPin();
+        });
 
-        function hugeConfetti() {
-            var end = Date.now() + 1500;
-            var interval = setInterval(function() {
-                if (Date.now() > end) return clearInterval(interval);
-                confetti({ particleCount: 20, spread: 360, origin: { x: Math.random(), y: Math.random() - 0.2 } });
-            }, 250);
-        }
-
-        // --- 🕰️ LIVE CLOCK ---
-        function updateClock() {
+        // 🕰️ CLOCK & BATTERY
+        function updateTime() {
             const now = new Date();
-            let h = now.getHours(), m = now.getMinutes();
-            let ampm = h >= 12 ? 'PM' : 'AM';
-            h = h % 12 || 12; m = m < 10 ? '0' + m : m;
-            document.getElementById('clock').textContent = `${h}:${m} ${ampm}`;
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            
+            hours = hours % 12;
+            hours = hours ? hours : 12; 
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            
+            const timeString = `${hours}:${minutes}`;
+            const options = { weekday: 'short', month: 'short', day: 'numeric' };
+            const dateString = now.toLocaleDateString('en-IN', options);
+
+            if(document.getElementById('os-time-small')) {
+                document.getElementById('os-time-small').textContent = `${timeString} ${ampm}`;
+            }
+            if(document.getElementById('os-time-large')) {
+                document.getElementById('os-time-large').textContent = timeString;
+            }
+            if(document.getElementById('os-date')) {
+                document.getElementById('os-date').textContent = dateString;
+            }
         }
-        setInterval(updateClock, 1000); updateClock();
+
+        async function updateBattery() {
+            try {
+                if ('getBattery' in navigator) {
+                    const battery = await navigator.getBattery();
+                    const updateLevel = () => {
+                        const batteryTextEl = document.getElementById('battery-text');
+                        if(batteryTextEl) batteryTextEl.textContent = `${Math.round(battery.level * 100)}%`;
+                    };
+                    updateLevel();
+                    battery.addEventListener('levelchange', updateLevel);
+                }
+            } catch (err) {}
+        }
     </script>
 </body>
 </html>
-
